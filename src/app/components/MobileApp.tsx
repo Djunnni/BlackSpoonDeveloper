@@ -10,7 +10,6 @@ import {
   CreditCard,
 } from "lucide-react";
 import { ZoneCard } from "./ZoneCard";
-import { SeoulMap } from "./SeoulMap";
 import { InterestZone } from "./InterestZone";
 import { ExtremeZone } from "./ExtremeZone";
 import { BalanceZone } from "./BalanceZone";
@@ -205,14 +204,6 @@ export function MobileApp() {
           onSave={handleTomorrowZoneSave}
           onCancel={() => setShowTomorrowZoneSetup(false)}
         />
-      );
-    }
-
-    if (currentTab === "map") {
-      return (
-        <div className="p-6">
-          <SeoulMap />
-        </div>
       );
     }
 
