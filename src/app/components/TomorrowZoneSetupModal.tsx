@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, Scale, Check, X } from "lucide-react";
+import { TrendingUp, Scale, Check, X, Sparkles } from "lucide-react";
 
 type Zone = "interest" | "extreme" | "balance";
 
@@ -80,6 +80,13 @@ const RATIO_OPTIONS = [
   },
 ];
 
+interface AIRecommendation {
+  themeId?: string;
+  ratioValue?: number;
+  reason: string;
+  marketAnalysis: string;
+}
+
 interface TomorrowZoneSetupModalProps {
   zone: "extreme" | "balance";
   onSave: (zone: Zone) => void;
@@ -93,6 +100,42 @@ export function TomorrowZoneSetupModal({
 }: TomorrowZoneSetupModalProps) {
   const [selectedTheme, setSelectedTheme] = useState("us-tech");
   const [selectedRatio, setSelectedRatio] = useState(25);
+  const [showAIRecommendation, setShowAIRecommendation] = useState(false);
+  const [aiRecommendation, setAiRecommendation] =
+    useState<AIRecommendation | null>(null);
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
+
+  const handleAIRecommendation = async () => {
+    setIsLoadingAI(true);
+
+    // Simulate AI processing
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    if (zone === "extreme") {
+      const mockRecommendation: AIRecommendation = {
+        themeId: "ai",
+        reason:
+          "AI/클라우드 섹터는 현재 강한 상승 모멘텀을 보이고 있으며, 주요 기업들의 실적이 시장 기대치를 상회하고 있습니다.",
+        marketAnalysis:
+          "최근 생성형 AI 기술의 발전으로 관련 기업들의 매출이 급증하고 있으며, 향후 3개월간 지속적인 성장이 예상됩니다. 다만 고위험 상품이므로 변동성에 주의가 필요합니다.",
+      };
+      setAiRecommendation(mockRecommendation);
+      setSelectedTheme(mockRecommendation.themeId!);
+    } else {
+      const mockRecommendation: AIRecommendation = {
+        ratioValue: 50,
+        reason:
+          "현재 시장 변동성이 중간 수준이므로, 균형형 투자 비율이 적합합니다.",
+        marketAnalysis:
+          "최근 시장 지표를 분석한 결과, 안정성과 수익성의 균형을 맞춘 50:50 비율이 가장 효율적인 위험-수익 구조를 제공할 것으로 예상됩니다.",
+      };
+      setAiRecommendation(mockRecommendation);
+      setSelectedRatio(mockRecommendation.ratioValue!);
+    }
+
+    setShowAIRecommendation(true);
+    setIsLoadingAI(false);
+  };
 
   const handleSave = () => {
     onSave(zone);
@@ -128,6 +171,50 @@ export function TomorrowZoneSetupModal({
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             <div className="space-y-4">
+              {/* AI Recommendation Button */}
+              <div>
+                <button
+                  onClick={handleAIRecommendation}
+                  disabled={isLoadingAI}
+                  className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  {isLoadingAI ? "AI 분석 중..." : "AI를 통한 추천받기"}
+                </button>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에
+                  따라 이루어집니다.
+                </p>
+              </div>
+
+              {/* AI Recommendation Result */}
+              {showAIRecommendation && aiRecommendation && (
+                <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    <h4 className="font-semibold text-purple-900">AI 추천</h4>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="p-3 bg-white/80 rounded-lg">
+                      <p className="text-sm font-medium text-gray-900 mb-1">
+                        추천 이유
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        {aiRecommendation.reason}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-white/80 rounded-lg">
+                      <p className="text-sm font-medium text-gray-900 mb-1">
+                        시장 분석
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        {aiRecommendation.marketAnalysis}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1">테마 선택</h3>
                 <p className="text-sm text-gray-600 mb-4">
@@ -216,6 +303,50 @@ export function TomorrowZoneSetupModal({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="space-y-4">
+            {/* AI Recommendation Button */}
+            <div>
+              <button
+                onClick={handleAIRecommendation}
+                disabled={isLoadingAI}
+                className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
+              >
+                <Sparkles className="w-5 h-5" />
+                {isLoadingAI ? "AI 분석 중..." : "AI를 통한 추천받기"}
+              </button>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라
+                이루어집니다.
+              </p>
+            </div>
+
+            {/* AI Recommendation Result */}
+            {showAIRecommendation && aiRecommendation && (
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  <h4 className="font-semibold text-purple-900">AI 추천</h4>
+                </div>
+                <div className="space-y-2">
+                  <div className="p-3 bg-white/80 rounded-lg">
+                    <p className="text-sm font-medium text-gray-900 mb-1">
+                      추천 이유
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      {aiRecommendation.reason}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-white/80 rounded-lg">
+                    <p className="text-sm font-medium text-gray-900 mb-1">
+                      시장 분석
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      {aiRecommendation.marketAnalysis}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">
                 투자 비율 선택

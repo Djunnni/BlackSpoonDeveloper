@@ -37,7 +37,14 @@ export function TomorrowZoneSelector({
               <Shield className="w-5 h-5 text-blue-600" />
             </div>
             <div className="flex-1 text-left">
-              <h3 className="font-semibold text-gray-900">이자존</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-gray-900">이자존</h3>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-0.5 rounded">
+                    위험도 0
+                  </span>
+                </div>
+              </div>
               <p className="text-sm text-gray-600">
                 원금 100% 보호 · 안정적 이자
               </p>
@@ -58,10 +65,16 @@ export function TomorrowZoneSelector({
               <TrendingUp className="w-5 h-5 text-orange-600" />
             </div>
             <div className="flex-1 text-left">
-              <h3 className="font-semibold text-gray-900">익스트림존</h3>
-              <p className="text-sm text-gray-600">
-                이자로만 투자 · 고위험 고수익
-              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-gray-900">익스트림존</h3>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
+                    위험도 5
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600">이자로만 투자 · 고위험</p>
+              <p className="text-xs text-red-600 mt-0.5">⚠️ 이자 손실 가능</p>
               {tomorrowZone === "extreme" && (
                 <p className="text-xs text-orange-600 mt-1">
                   테마: 미국 테크 선택됨
@@ -84,9 +97,17 @@ export function TomorrowZoneSelector({
               <Scale className="w-5 h-5 text-purple-600" />
             </div>
             <div className="flex-1 text-left">
-              <h3 className="font-semibold text-gray-900">밸런스존</h3>
-              <p className="text-sm text-gray-600">
-                원금 일부 투자 · 중위험 중수익
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-gray-900">밸런스존</h3>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
+                    위험도 3
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600">원금 일부 투자 · 중위험</p>
+              <p className="text-xs text-orange-600 mt-0.5">
+                ⚠️ 원금 일부 손실 가능
               </p>
               {tomorrowZone === "balance" && (
                 <p className="text-xs text-purple-600 mt-1">
