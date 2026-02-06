@@ -1,15 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Layout } from "../Layout";
-import {
-  Bell,
-  Wallet,
-  CreditCard,
-  User,
-  Shield,
-  FileText,
-  HelpCircle,
-  LogOut,
-} from "lucide-react";
+import { Bell, Wallet, User, Shield, FileText, HelpCircle } from "lucide-react";
 
 export function SettingsPage() {
   const navigate = useNavigate();
@@ -125,12 +116,6 @@ export function SettingsPage() {
             );
           })}
         </div>
-
-        {/* Logout Button */}
-        <button className="w-full bg-white rounded-2xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-red-600 font-semibold">
-          <LogOut className="w-5 h-5" />
-          로그아웃
-        </button>
 
         {/* Version Info */}
         <div className="text-center mt-6">
