@@ -118,57 +118,57 @@ export function ReportPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <DollarSign className="w-5 h-5 text-blue-600" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+              <div className="p-2 bg-blue-100 rounded-lg w-fit">
+                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
               </div>
-              <p className="text-sm text-gray-600">총 투자금액</p>
+              <p className="text-xs sm:text-sm text-gray-600">총 투자금액</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-lg sm:text-2xl font-bold text-gray-900">
               {totalInvested.toLocaleString()}원
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-green-600" />
+          <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+              <div className="p-2 bg-green-100 rounded-lg w-fit">
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
               </div>
-              <p className="text-sm text-gray-600">총 수익금</p>
+              <p className="text-xs sm:text-sm text-gray-600">총 수익금</p>
             </div>
             <p
-              className={`text-2xl font-bold ${totalProfit >= 0 ? "text-green-600" : "text-red-600"}`}
+              className={`text-lg sm:text-2xl font-bold ${totalProfit >= 0 ? "text-green-600" : "text-red-600"}`}
             >
               {totalProfit >= 0 ? "+" : ""}
               {totalProfit.toLocaleString()}원
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Target className="w-5 h-5 text-purple-600" />
+          <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+              <div className="p-2 bg-purple-100 rounded-lg w-fit">
+                <Target className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
               </div>
-              <p className="text-sm text-gray-600">평균 수익률</p>
+              <p className="text-xs sm:text-sm text-gray-600">평균 수익률</p>
             </div>
             <p
-              className={`text-2xl font-bold ${avgReturn >= 0 ? "text-green-600" : "text-red-600"}`}
+              className={`text-lg sm:text-2xl font-bold ${avgReturn >= 0 ? "text-green-600" : "text-red-600"}`}
             >
               {avgReturn >= 0 ? "+" : ""}
               {avgReturn.toFixed(2)}%
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border border-gray-200">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Clock className="w-5 h-5 text-orange-600" />
+          <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+              <div className="p-2 bg-orange-100 rounded-lg w-fit">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
               </div>
-              <p className="text-sm text-gray-600">수익률</p>
+              <p className="text-xs sm:text-sm text-gray-600">수익률</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-lg sm:text-2xl font-bold text-gray-900">
               {winRate.toFixed(0)}%
             </p>
           </div>
