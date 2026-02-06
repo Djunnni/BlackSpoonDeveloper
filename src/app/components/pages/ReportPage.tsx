@@ -176,24 +176,34 @@ export function ReportPage() {
 
   return (
     <Layout>
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-5 border border-blue-600 col-span-2 lg:col-span-1 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-            <div className="p-2 bg-white/20 rounded-lg w-fit">
-              <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            <p className="text-xs sm:text-sm text-blue-50">지역 내 순위</p>
-          </div>
-          <p className="text-lg sm:text-2xl font-bold text-white mb-1">
-            상위 {(100 - regionalRanking.percentile).toFixed(1)}%
-          </p>
-          <p className="text-xs text-blue-100">
-            {regionalRanking.totalUsers.toLocaleString()}명 중{" "}
-            {regionalRanking.myRank}위
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">투자 분석</h1>
+          <p className="text-sm text-gray-600">
+            투자 내역과 수익률을 확인하세요
           </p>
         </div>
+
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
+          {/* Regional Ranking - 모바일에서 한 칸 차지 */}
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-5 border border-blue-600 col-span-2 lg:col-span-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+              <div className="p-2 bg-white/20 rounded-lg w-fit">
+                <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <p className="text-xs sm:text-sm text-blue-50">지역 내 순위</p>
+            </div>
+            <p className="text-lg sm:text-2xl font-bold text-white mb-1">
+              상위 {(100 - regionalRanking.percentile).toFixed(1)}%
+            </p>
+            <p className="text-xs text-blue-100">
+              {regionalRanking.totalUsers.toLocaleString()}명 중{" "}
+              {regionalRanking.myRank}위
+            </p>
+          </div>
+
+          {/* 총 투자금액 */}
           <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
               <div className="p-2 bg-blue-100 rounded-lg w-fit">
@@ -206,6 +216,7 @@ export function ReportPage() {
             </p>
           </div>
 
+          {/* 총 수익금 */}
           <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
               <div className="p-2 bg-green-100 rounded-lg w-fit">
@@ -221,6 +232,7 @@ export function ReportPage() {
             </p>
           </div>
 
+          {/* 평균 수익률 */}
           <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
               <div className="p-2 bg-purple-100 rounded-lg w-fit">
@@ -236,6 +248,7 @@ export function ReportPage() {
             </p>
           </div>
 
+          {/* 수익률 */}
           <div className="bg-white rounded-xl p-4 sm:p-5 border border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
               <div className="p-2 bg-orange-100 rounded-lg w-fit">
