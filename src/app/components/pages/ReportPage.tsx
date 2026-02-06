@@ -176,8 +176,8 @@ export function ReportPage() {
 
   return (
     <Layout>
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-5 border border-blue-600 col-span-2 lg:col-span-1">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-5 border border-blue-600 col-span-2 lg:col-span-1 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
             <div className="p-2 bg-white/20 rounded-lg w-fit">
               <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
