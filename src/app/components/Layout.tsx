@@ -13,7 +13,7 @@ export function Layout({ children }: LayoutProps) {
   const getCurrentTab = () => {
     if (location.pathname === "/") return "home";
     if (location.pathname === "/map") return "map";
-    if (location.pathname === "/report") return "report";
+    if (location.pathname === "/analysis") return "analysis";
     if (location.pathname === "/settings") return "settings";
     return "home";
   };

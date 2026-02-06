@@ -10,7 +10,7 @@ export default function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<MainApp />} />
-        <Route path="/report" element={<ReportPage />} />
+        <Route path="/analysis" element={<ReportPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/charge" element={<ChargePage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
