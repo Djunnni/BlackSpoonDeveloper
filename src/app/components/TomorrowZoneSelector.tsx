@@ -6,11 +6,15 @@ type Zone = "interest" | "extreme" | "balance";
 interface TomorrowZoneSelectorProps {
   tomorrowZone: Zone;
   onZoneClick: (zone: Zone) => void;
+  showRegionAlert: () => void;
+  hasRegionSelected: boolean;
 }
 
 export function TomorrowZoneSelector({
   tomorrowZone,
   onZoneClick,
+  hasRegionSelected,
+  showRegionAlert,
 }: TomorrowZoneSelectorProps) {
   return (
     <div>
@@ -53,29 +57,55 @@ export function TomorrowZoneSelector({
         </button>
 
         <button
-          onClick={() => onZoneClick("extreme")}
+          onClick={() => {
+            if (!hasRegionSelected) {
+              showRegionAlert();
+              return;
+            }
+            onZoneClick("extreme");
+          }}
           className={`w-full p-4 rounded-2xl border-2 transition-all ${
             tomorrowZone === "extreme"
               ? "bg-orange-50 border-orange-500"
-              : "bg-white border-gray-200 hover:border-gray-300"
+              : hasRegionSelected
+                ? "bg-white border-gray-200 hover:border-gray-300"
+                : "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-orange-100">
-              <TrendingUp className="w-5 h-5 text-orange-600" />
+            <div
+              className={`p-2.5 rounded-xl ${hasRegionSelected ? "bg-orange-100" : "bg-gray-200"}`}
+            >
+              <TrendingUp
+                className={`w-5 h-5 ${hasRegionSelected ? "text-orange-600" : "text-gray-400"}`}
+              />
             </div>
             <div className="flex-1 text-left">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-gray-900">익스트림존</h3>
+                <h3
+                  className={`font-semibold ${hasRegionSelected ? "text-gray-900" : "text-gray-400"}`}
+                >
+                  익스트림존
+                </h3>
                 <div className="flex items-center gap-1">
-                  <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded">
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${hasRegionSelected ? "text-orange-600 bg-orange-100" : "text-gray-400 bg-gray-200"}`}
+                  >
                     위험도 5
                   </span>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">이자로만 투자 · 고위험</p>
-              <p className="text-xs text-red-600 mt-0.5">⚠️ 이자 손실 가능</p>
-              {tomorrowZone === "extreme" && (
+              <p
+                className={`text-sm ${hasRegionSelected ? "text-gray-600" : "text-gray-400"}`}
+              >
+                이자로만 투자 · 고위험
+              </p>
+              <p
+                className={`text-xs mt-0.5 ${hasRegionSelected ? "text-red-600" : "text-gray-400"}`}
+              >
+                {hasRegionSelected ? "⚠️ 이자 손실 가능" : "🔒 지역 선택 필요"}
+              </p>
+              {tomorrowZone === "extreme" && hasRegionSelected && (
                 <p className="text-xs text-orange-600 mt-1">
                   테마: 미국 테크 선택됨
                 </p>
@@ -85,31 +115,57 @@ export function TomorrowZoneSelector({
         </button>
 
         <button
-          onClick={() => onZoneClick("balance")}
+          onClick={() => {
+            if (!hasRegionSelected) {
+              showRegionAlert();
+              return;
+            }
+            onZoneClick("balance");
+          }}
           className={`w-full p-4 rounded-2xl border-2 transition-all ${
             tomorrowZone === "balance"
               ? "bg-purple-50 border-purple-500"
-              : "bg-white border-gray-200 hover:border-gray-300"
+              : hasRegionSelected
+                ? "bg-white border-gray-200 hover:border-gray-300"
+                : "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
           }`}
         >
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-purple-100">
-              <Scale className="w-5 h-5 text-purple-600" />
+            <div
+              className={`p-2.5 rounded-xl ${hasRegionSelected ? "bg-purple-100" : "bg-gray-200"}`}
+            >
+              <Scale
+                className={`w-5 h-5 ${hasRegionSelected ? "text-purple-600" : "text-gray-400"}`}
+              />
             </div>
             <div className="flex-1 text-left">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-gray-900">밸런스존</h3>
+                <h3
+                  className={`font-semibold ${hasRegionSelected ? "text-gray-900" : "text-gray-400"}`}
+                >
+                  밸런스존
+                </h3>
                 <div className="flex items-center gap-1">
-                  <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${hasRegionSelected ? "text-purple-600 bg-purple-100" : "text-gray-400 bg-gray-200"}`}
+                  >
                     위험도 3
                   </span>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">원금 일부 투자 · 중위험</p>
-              <p className="text-xs text-orange-600 mt-0.5">
-                ⚠️ 원금 일부 손실 가능
+              <p
+                className={`text-sm ${hasRegionSelected ? "text-gray-600" : "text-gray-400"}`}
+              >
+                원금 일부 투자 · 중위험
               </p>
-              {tomorrowZone === "balance" && (
+              <p
+                className={`text-xs mt-0.5 ${hasRegionSelected ? "text-orange-600" : "text-gray-400"}`}
+              >
+                {hasRegionSelected
+                  ? "⚠️ 원금 일부 손실 가능"
+                  : "🔒 지역 선택 필요"}
+              </p>
+              {tomorrowZone === "balance" && hasRegionSelected && (
                 <p className="text-xs text-purple-600 mt-1">
                   안정형 (25% / 75%) 선택됨
                 </p>
