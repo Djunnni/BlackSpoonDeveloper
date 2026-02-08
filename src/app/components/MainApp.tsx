@@ -21,7 +21,11 @@ export function MainApp() {
   );
   const [showRegionAlert, setShowRegionAlert] = useState(false);
 
-  // ✅ 개발용: 지역 없어도 밸런스/익스트림 활성화 (기본 ON)
+  // ✅ 개발 중 강제 활성화 (이거 true면 지역 없어도 밸런스/익스트림 무조건 열린다)
+  const DEV_FORCE_ZONE_ENABLE = true;
+
+  // ✅ 임시: 네이티브에서 regionSelected 못 받아도 "잠깐" 활성화하기 위한 플래그
+  // (DEV_FORCE_ZONE_ENABLE 켜면 사실상 필요없지만, 남겨둠)
   const [tempHasRegion, setTempHasRegion] = useState(true);
 
   // ✅ Native Bridge: moveTab(0~5)
@@ -52,15 +56,13 @@ export function MainApp() {
   // ✅ 원래 지역 판단
   const realHasRegion = !!(user?.regionCode && user.regionCode !== "000000");
 
-  // ✅ 최종: 개발용 강제 활성화가 켜져 있으면 지역 없어도 true
-  const hasRegion = realHasRegion || tempHasRegion;
+  // ✅ 최종: 개발용 강제 활성화 or 임시 활성화가 켜져 있으면 true
+  const hasRegion = realHasRegion || tempHasRegion || DEV_FORCE_ZONE_ENABLE;
 
-  // ✅ (옵션) 네이티브 regionSelected 이벤트도 같이 받으면 개발용 플래그 꺼줌(원하면 유지해도 됨)
+  // ✅ (옵션) 네이티브 regionSelected 이벤트도 같이 받기
   const onNativeRegionSelected = useCallback((payload: any) => {
     if (payload?.type === "regionSelected") {
-      // ✅ 실서버/네이티브 연동되면 개발용 강제 모드 OFF로 되돌리고 싶으면 아래 유지
-      // setTempHasRegion(false);
-
+      setTempHasRegion(false);
       setShowRegionAlert(false);
     }
   }, []);
@@ -102,12 +104,24 @@ export function MainApp() {
   const handleTomorrowZoneClick = (zone: Zone) => {
     if (zone === "interest") {
       selectZone({ zone: "interest" });
-    } else if (zone === "extreme" || zone === "balance") {
-      // ✅ 개발용: tempHasRegion=true면 무조건 패스
+      return;
+    }
+
+    if (zone === "extreme" || zone === "balance") {
+      // ✅ 개발 중에는 무조건 열리게 (지역 체크/모달 차단 전부 무시)
+      if (DEV_FORCE_ZONE_ENABLE) {
+        setShowRegionAlert(false);
+        setSetupZoneType(zone);
+        setShowTomorrowZoneSetup(true);
+        return;
+      }
+
+      // ✅ 실서비스 모드에서는 지역 체크
       if (!hasRegion) {
         setShowRegionAlert(true);
         return;
       }
+
       setSetupZoneType(zone);
       setShowTomorrowZoneSetup(true);
     }
@@ -126,6 +140,9 @@ export function MainApp() {
       setShowTomorrowZoneSetup(false);
     } catch (error) {
       console.error("Failed to select zone:", error);
+
+      // ✅ 개발 중 서버 미구현이면 여기서라도 모달 닫히게 (원하면 주석 해제)
+      // if (DEV_FORCE_ZONE_ENABLE) setShowTomorrowZoneSetup(false);
     }
   };
 
@@ -194,8 +211,8 @@ export function MainApp() {
           </div>
         </div>
 
-        {/* ✅ 개발용 토글: 기본 ON 상태로 시작 */}
-        {!realHasRegion && (
+        {/* 개발용 토글 */}
+        {!realHasRegion && !DEV_FORCE_ZONE_ENABLE && (
           <div className="mb-4 flex items-center gap-2">
             <button
               onClick={() => setTempHasRegion((v) => !v)}
@@ -205,15 +222,15 @@ export function MainApp() {
                   : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
               }`}
             >
-              {tempHasRegion ? "개발모드: 지역체크 OFF (해제)" : "개발모드: 지역체크 OFF (활성)"}
+              {tempHasRegion ? "임시 지역 ON (해제)" : "임시로 밸런스존 활성화"}
             </button>
             <p className="text-xs text-gray-500">
-              (개발용) regionSelected 연동 전 밸런스존/익스트림존 테스트 허용
+              (개발용) regionSelected 연동 전 잠깐 테스트용
             </p>
           </div>
         )}
 
-        {/* 지역 미선택 알림 (개발모드 ON이면 안 뜸) */}
+        {/* 지역 미선택 알림 (개발 강제 활성화면 안 뜨게 됨) */}
         {!hasRegion && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
@@ -237,11 +254,8 @@ export function MainApp() {
           </div>
         )}
 
-        {/* Grid Layout for Desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Today's Zone */}
             <div>
               <div className="mb-3">
                 <h3 className="font-semibold text-gray-900">투자중인 존</h3>
@@ -254,20 +268,18 @@ export function MainApp() {
               />
             </div>
 
-            {/* Tomorrow Zone Selection */}
+            {/* ✅ 여기서 강제로 true 주면 TomorrowZoneSelector 내부 disable도 풀림 */}
             <TomorrowZoneSelector
               tomorrowZone={account?.nextZone || "interest"}
               onZoneClick={handleTomorrowZoneClick}
               showRegionAlert={() => {
                 setShowRegionAlert(true);
               }}
-              hasRegionSelected={hasRegion || false}
+              hasRegionSelected={DEV_FORCE_ZONE_ENABLE ? true : (hasRegion || false)}
             />
           </div>
 
-          {/* Sidebar for Desktop */}
           <div className="space-y-6">
-            {/* Quick Actions */}
             <div className="bg-white rounded-2xl p-5 border border-gray-200">
               <h3 className="font-semibold text-gray-900 mb-4">빠른 메뉴</h3>
               <div className="space-y-2">
@@ -298,7 +310,6 @@ export function MainApp() {
               </div>
             </div>
 
-            {/* Account Info */}
             <div className="bg-white rounded-2xl p-5 border border-gray-200">
               <h3 className="font-semibold text-gray-900 mb-4">계좌 정보</h3>
               <div className="space-y-3">
@@ -336,7 +347,6 @@ export function MainApp() {
         </div>
       </div>
 
-      {/* Region Alert Modal */}
       {showRegionAlert && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm p-6">
