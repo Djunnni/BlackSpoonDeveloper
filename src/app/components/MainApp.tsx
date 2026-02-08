@@ -182,7 +182,8 @@ export function MainApp() {
       )}
 
       {/* ✅ JB 머니(헤더) 고정 + 아래만 스크롤 */}
-      <div className="h-[100dvh] overflow-hidden flex flex-col">
+      {/* ✅ NOTE: Layout이 이미 높이를 잡고 있을 수 있어서 h-full 로 두는게 더 안전 */}
+      <div className="h-full overflow-hidden flex flex-col">
         {/* ✅ 1) 고정 헤더 영역 */}
         <div className="shrink-0 bg-white">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
@@ -266,11 +267,26 @@ export function MainApp() {
         </div>
 
         {/* ✅ 2) 아래만 스크롤되는 영역 */}
-         <div
-            className="flex-1 min-h-0 overflow-y-auto"
-            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+        {/* ✅ 스크롤바(영역) 숨김 + iOS safe-area 만큼 바닥 여백 확보 */}
+        <div
+          className="flex-1 min-h-0 overflow-y-auto"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none", // Firefox
+            msOverflowStyle: "none", // IE/Edge(old)
+          }}
+        >
+          {/* WebKit 스크롤바 숨김(인라인 스타일만으로는 안되어서 내부 <style> 사용) */}
+          <style>{`
+            .bs-scroll-hidden::-webkit-scrollbar { display: none; width: 0; height: 0; }
+          `}</style>
+
+          <div
+            className="bs-scroll-hidden max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+            style={{
+              paddingBottom: "calc(env(safe-area-inset-bottom) + 120px)",
+            }}
           >
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 <div>
@@ -365,6 +381,9 @@ export function MainApp() {
                     </div>
                   </div>
                 </div>
+
+                {/* ✅ 아래 내용이 더 있어도 탭바에 안가리고 끝까지 스크롤되게 */}
+                {/* 필요한 섹션을 여기에 계속 추가하면 됨 */}
               </div>
             </div>
           </div>
