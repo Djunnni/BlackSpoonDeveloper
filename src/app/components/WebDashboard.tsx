@@ -391,7 +391,7 @@ export function WebDashboard() {
 
                   {/* 타이틀 중앙 */}
                   <h2 className="w-full text-center text-lg font-bold text-gray-900">
-                    알림 22 설정
+                    알림 설정
                   </h2>
                 </div>
 
