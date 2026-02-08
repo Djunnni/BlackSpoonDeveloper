@@ -23,7 +23,7 @@ export function NotificationsPage() {
 
             {/* 타이틀 중앙 정렬 */}
             <h1 className="w-full text-center text-lg font-bold text-gray-900">
-              알림 22설정
+              알림 33 설정
             </h1>
           </div>
         </div>
