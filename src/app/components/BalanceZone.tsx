@@ -135,6 +135,7 @@ export function BalanceZone() {
   const [aiReason, setAiReason] = useState<string>('');
   const [aiOpen, setAiOpen] = useState<boolean>(true);
 
+  // ✅ 버튼 누르면 "하단 AI 추천 영역"으로 자동 스크롤
   const aiSectionRef = useRef<HTMLDivElement | null>(null);
 
   const selectedTheme = useMemo(() => {
@@ -143,7 +144,6 @@ export function BalanceZone() {
 
   useEffect(() => {
     if (!aiThemeId) return;
-    // ✅ 추천이 생성되면 자동 스크롤
     aiSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [aiThemeId]);
 
@@ -299,101 +299,112 @@ export function BalanceZone() {
             </button>
           ))}
         </div>
+      </div>
 
-        {/* ✅ AI 추천: "공격형" 영역(비율 선택) 바로 아래 */}
-        <div ref={aiSectionRef} className="mt-5">
-          {/* 버튼 텍스트 변경 */}
-          <button
-            onClick={handleAiRecommend}
-            className="w-full rounded-xl border-2 border-gray-200 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-black hover:to-gray-900 text-white p-4 transition-all"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-lg">
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm text-white/80">내일 투자 비율: {tomorrowLabel}</p>
-                  <p className="text-lg font-bold">AI를 통한 테마 추천 받기</p>
-                </div>
+      {/* ✅ AI 추천: "공격형(비율 선택)" 카드 아래로 완전히 분리해서 하단에 배치 */}
+      <div ref={aiSectionRef} className="bg-white rounded-2xl p-6 border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900">AI 추천</h3>
+
+          {/* ✅ 버튼 누르면 이 영역으로 스크롤되고, 추천된 테마가 "AI 추천 옆"에 노출 */}
+          {selectedTheme ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">AI 추천</span>
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${selectedTheme.color} text-white`}>
+                {selectedTheme.icon} {selectedTheme.name}
+              </span>
+            </div>
+          ) : (
+            <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">AI 추천</span>
+          )}
+        </div>
+
+        {/* ✅ 버튼 텍스트: "AI를 통한 테마 추천받기" */}
+        <button
+          onClick={handleAiRecommend}
+          className="w-full rounded-xl border-2 border-gray-200 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-black hover:to-gray-900 text-white p-4 transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/10 rounded-lg">
+                <Sparkles className="w-5 h-5" />
               </div>
+              <div className="text-left">
+                <p className="text-sm text-white/80">내일 투자 비율: {tomorrowLabel}</p>
+                <p className="text-lg font-bold">AI를 통한 테마 추천받기</p>
+              </div>
+            </div>
 
-              {/* 선택된 테마가 있으면 우측에 "AI 추천 + 테마" 배지 */}
-              {selectedTheme ? (
+            {/* ✅ 버튼 우측에도 선택된 테마 배지 노출(아이콘 포함) */}
+            {selectedTheme ? (
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${selectedTheme.color} text-white`}>
+                {selectedTheme.icon} {selectedTheme.name}
+              </span>
+            ) : (
+              <span className="text-xs font-semibold bg-white/15 px-3 py-1 rounded-full">AI 추천</span>
+            )}
+          </div>
+        </button>
+
+        {/* ✅ 추천 결과 패널 */}
+        <div
+          className={`mt-3 rounded-2xl border transition-all overflow-hidden ${
+            selectedTheme ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
+          }`}
+        >
+          {selectedTheme && (
+            <div className="p-5">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold bg-white/15 px-3 py-1 rounded-full">AI 추천</span>
+                  <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+                    AI 추천
+                  </span>
                   <span className={`text-xs font-semibold px-3 py-1 rounded-full ${selectedTheme.color} text-white`}>
                     {selectedTheme.icon} {selectedTheme.name}
                   </span>
-                </div>
-              ) : (
-                <span className="text-xs font-semibold bg-white/15 px-3 py-1 rounded-full">AI 추천</span>
-              )}
-            </div>
-          </button>
-
-          {/* ✅ 하단 확장 패널 (추천 결과) */}
-          <div
-            className={`mt-3 rounded-2xl border transition-all overflow-hidden ${
-              selectedTheme ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
-            }`}
-          >
-            {selectedTheme && (
-              <div className="p-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
-                      AI 추천
-                    </span>
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${selectedTheme.color} text-white`}>
-                      {selectedTheme.icon} {selectedTheme.name}
-                    </span>
-                    <span className="text-xs text-gray-500 hidden sm:inline">
-                      · {selectedTheme.description}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => setAiOpen(v => !v)}
-                    className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-1"
-                  >
-                    {aiOpen ? (
-                      <>
-                        접기 <ChevronUp className="w-4 h-4" />
-                      </>
-                    ) : (
-                      <>
-                        펼치기 <ChevronDown className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
+                  <span className="text-xs text-gray-500 hidden sm:inline">· {selectedTheme.description}</span>
                 </div>
 
-                <div className={`transition-all ${aiOpen ? 'mt-4 opacity-100' : 'mt-0 opacity-0 h-0 overflow-hidden'}`}>
-                  <div className="rounded-xl bg-gray-50 border border-gray-200 p-4">
-                    <p className="text-sm font-semibold text-gray-900 mb-1">추천 이유</p>
-                    <p className="text-sm text-gray-700 leading-relaxed">{aiReason}</p>
+                <button
+                  onClick={() => setAiOpen(v => !v)}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                >
+                  {aiOpen ? (
+                    <>
+                      접기 <ChevronUp className="w-4 h-4" />
+                    </>
+                  ) : (
+                    <>
+                      펼치기 <ChevronDown className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-                        이자존 비율 {100 - tomorrowExtremeRatio}%
-                      </span>
-                      <span className="text-xs bg-orange-50 text-orange-700 px-3 py-1 rounded-full">
-                        익스트림존 비율 {tomorrowExtremeRatio}%
-                      </span>
-                      <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
-                        내일 00:00 자동 적용
-                      </span>
-                    </div>
-                  </div>
+              <div className={`transition-all ${aiOpen ? 'mt-4 opacity-100' : 'mt-0 opacity-0 h-0 overflow-hidden'}`}>
+                <div className="rounded-xl bg-gray-50 border border-gray-200 p-4">
+                  <p className="text-sm font-semibold text-gray-900 mb-1">추천 이유</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{aiReason}</p>
 
-                  <div className="mt-3 text-xs text-gray-500">
-                    ※ 현재는 서버 미구현으로 샘플 데이터(10개 테마)에서 랜덤 추천됩니다.
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                      이자존 비율 {100 - tomorrowExtremeRatio}%
+                    </span>
+                    <span className="text-xs bg-orange-50 text-orange-700 px-3 py-1 rounded-full">
+                      익스트림존 비율 {tomorrowExtremeRatio}%
+                    </span>
+                    <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
+                      내일 00:00 자동 적용
+                    </span>
                   </div>
+                </div>
+
+                <div className="mt-3 text-xs text-gray-500">
+                  ※ 현재는 서버 미구현으로 샘플 데이터(10개 테마)에서 랜덤 추천됩니다.
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
