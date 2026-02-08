@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ArrowRight, Check, Wallet, Building2 } from "lucide-react";
 import { HistoryBackButton } from "../components/HistoryBackButton";
 
-
 export function ChargeMoney() {
   const [step, setStep] = useState<"input" | "complete">("input");
   const [amount, setAmount] = useState("");
@@ -41,19 +40,23 @@ export function ChargeMoney() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* 🔙 뒤로가기 */}
-      <HistoryBackButton />
+    {/* 상단 헤더 */}
+  <div className="relative flex items-center h-12 mb-2">
+        {/* 뒤로가기 */}
+        <div className="absolute left-0">
+          <HistoryBackButton />
+        </div>
 
-      {/* 타이틀 */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        {/* 타이틀 */}
+        <h2 className="w-full text-center text-lg font-bold text-gray-900">
           JB머니 금고 충전
         </h2>
-        <p className="text-sm text-gray-600">
-          JB계좌에서 JB머니 금고로 금액을 이체합니다
-        </p>
       </div>
+
+      <p className="text-sm text-gray-600 text-center mb-4">
+        JB계좌에서 JB머니 금고로 금액을 이체합니다
+      </p>
+  </div>
 
       {/* 계좌 정보 */}
       <div className="grid grid-cols-2 gap-4">
