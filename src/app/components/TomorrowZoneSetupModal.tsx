@@ -203,7 +203,7 @@ export function TomorrowZoneSetupModal({
                   <Sparkles className="w-5 h-5" />
                   {isLoadingAI
                     ? "AI 분석 중..."
-                    : "AI를 통한  추천받기"}
+                    : "AI를 통한 테마 추천받기"}
                 </button>
                 <p className="text-xs text-gray-500 mt-2 text-center">
                   AI 추천은 참고용 보조 기능이며, 투자 결정은
