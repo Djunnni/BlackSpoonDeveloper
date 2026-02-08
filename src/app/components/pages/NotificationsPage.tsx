@@ -34,7 +34,7 @@ export function NotificationsPage() {
                   <Bell className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">푸시 222알림</p>
+                  <p className="font-semibold text-gray-900">푸시 알림</p>
                   <p className="text-sm text-gray-600">모든 알림 수신</p>
                 </div>
               </div>

@@ -15,41 +15,66 @@ export function ChargeMoney() {
   const handleCharge = () => {
     if (amount && parseInt(amount) > 0) {
       setStep("complete");
-      setTimeout(() => {
-        setStep("input");
-        setAmount("");
-      }, 3000);
     }
   };
 
+  const handleDone = () => {
+    // 완료 버튼 누르면 이전 화면으로
+    window.history.back();
+  };
+
+  /* ===========================
+     ✅ 충전 완료 화면
+     =========================== */
   if (step === "complete") {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-6">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
-          <Check className="w-10 h-10 text-green-600" />
+      <div className="flex flex-col min-h-[60vh] px-6">
+        <div className="flex flex-col items-center justify-center flex-1">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+            <Check className="w-10 h-10 text-green-600" />
+          </div>
+
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            충전이 완료되었습니다
+          </h2>
+          <p className="text-gray-600 text-center">
+            JB머니 금고에{" "}
+            <span className="font-semibold text-gray-900">
+              {parseInt(amount).toLocaleString()}원
+            </span>
+            이 입금되었습니다
+          </p>
         </div>
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          충전이 완료되었습니다
-        </h2>
-        <p className="text-gray-600 mb-8">
-          JB머니 금고에 {parseInt(amount).toLocaleString()}원이 입금되었습니다
-        </p>
+        {/* 하단 완료 버튼 */}
+        <button
+          onClick={handleDone}
+          className="
+            w-full py-4 mb-4
+            bg-green-600 hover:bg-green-700
+            text-white font-semibold
+            rounded-xl
+            transition-colors
+          "
+        >
+          완료
+        </button>
       </div>
     );
   }
 
+  /* ===========================
+     ✅ 충전 입력 화면
+     =========================== */
   return (
     <div className="space-y-6">
       {/* 상단 헤더 */}
       <div className="space-y-2">
         <div className="relative flex items-center h-12">
-          {/* 뒤로가기 */}
           <div className="absolute left-0">
             <HistoryBackButton />
           </div>
 
-          {/* 타이틀 (정중앙) */}
           <h2 className="w-full text-center text-lg font-bold text-gray-900">
             JB머니 금고 충전
           </h2>
@@ -111,7 +136,15 @@ export function ChargeMoney() {
       <button
         onClick={handleCharge}
         disabled={!amount || parseInt(amount) <= 0}
-        className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
+        className="
+          w-full py-4
+          bg-blue-600 hover:bg-blue-700
+          disabled:bg-gray-300 disabled:cursor-not-allowed
+          text-white font-semibold
+          rounded-xl
+          flex items-center justify-center gap-2
+          transition-colors
+        "
       >
         <span>충전하기</span>
         <ArrowRight className="w-5 h-5" />
