@@ -21,8 +21,8 @@ export function MainApp() {
   );
   const [showRegionAlert, setShowRegionAlert] = useState(false);
 
-  // ✅ 임시: 네이티브에서 regionSelected 못 받아도 "잠깐" 활성화하기 위한 플래그
-  const [tempHasRegion, setTempHasRegion] = useState(false);
+  // ✅ 개발용: 지역 없어도 밸런스/익스트림 활성화 (기본 ON)
+  const [tempHasRegion, setTempHasRegion] = useState(true);
 
   // ✅ Native Bridge: moveTab(0~5)
   // 0홈 1지역 2분석 3분석 4ai상담사 5설정
@@ -52,14 +52,15 @@ export function MainApp() {
   // ✅ 원래 지역 판단
   const realHasRegion = !!(user?.regionCode && user.regionCode !== "000000");
 
-  // ✅ 최종: "임시 활성화"를 켜면 지역 없어도 true로 간주
+  // ✅ 최종: 개발용 강제 활성화가 켜져 있으면 지역 없어도 true
   const hasRegion = realHasRegion || tempHasRegion;
 
-  // ✅ (옵션) 네이티브 regionSelected 이벤트도 같이 받으면 자동으로 임시 플래그 꺼줌
+  // ✅ (옵션) 네이티브 regionSelected 이벤트도 같이 받으면 개발용 플래그 꺼줌(원하면 유지해도 됨)
   const onNativeRegionSelected = useCallback((payload: any) => {
     if (payload?.type === "regionSelected") {
-      // 네이티브에서 진짜로 지역 선택 완료된 거니까 임시 모드 종료
-      setTempHasRegion(false);
+      // ✅ 실서버/네이티브 연동되면 개발용 강제 모드 OFF로 되돌리고 싶으면 아래 유지
+      // setTempHasRegion(false);
+
       setShowRegionAlert(false);
     }
   }, []);
@@ -102,7 +103,7 @@ export function MainApp() {
     if (zone === "interest") {
       selectZone({ zone: "interest" });
     } else if (zone === "extreme" || zone === "balance") {
-      // ✅ 임시 활성화가 켜져 있으면 지역 체크 패스
+      // ✅ 개발용: tempHasRegion=true면 무조건 패스
       if (!hasRegion) {
         setShowRegionAlert(true);
         return;
@@ -193,7 +194,7 @@ export function MainApp() {
           </div>
         </div>
 
-        {/* ✅ 임시 활성화 토글(개발용) */}
+        {/* ✅ 개발용 토글: 기본 ON 상태로 시작 */}
         {!realHasRegion && (
           <div className="mb-4 flex items-center gap-2">
             <button
@@ -204,15 +205,15 @@ export function MainApp() {
                   : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
               }`}
             >
-              {tempHasRegion ? "임시 지역 ON (해제)" : "임시로 밸런스존 활성화"}
+              {tempHasRegion ? "개발모드: 지역체크 OFF (해제)" : "개발모드: 지역체크 OFF (활성)"}
             </button>
             <p className="text-xs text-gray-500">
-              (개발용) regionSelected 연동 전 잠깐 테스트용
+              (개발용) regionSelected 연동 전 밸런스존/익스트림존 테스트 허용
             </p>
           </div>
         )}
 
-        {/* 지역 미선택 알림 */}
+        {/* 지역 미선택 알림 (개발모드 ON이면 안 뜸) */}
         {!hasRegion && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
