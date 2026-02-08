@@ -21,15 +21,9 @@ export function MainApp() {
   );
   const [showRegionAlert, setShowRegionAlert] = useState(false);
 
-  // ✅ 개발 중 강제 활성화 (이거 true면 지역 없어도 밸런스/익스트림 무조건 열린다)
   const DEV_FORCE_ZONE_ENABLE = true;
-
-  // ✅ 임시: 네이티브에서 regionSelected 못 받아도 "잠깐" 활성화하기 위한 플래그
-  // (DEV_FORCE_ZONE_ENABLE 켜면 사실상 필요없지만, 남겨둠)
   const [tempHasRegion, setTempHasRegion] = useState(true);
 
-  // ✅ Native Bridge: moveTab(0~5)
-  // 0홈 1지역 2분석 3분석 4ai상담사 5설정
   const postMoveTab = (tab: 0 | 1 | 2 | 3 | 4 | 5, message?: string) => {
     const payload = {
       type: "moveTab",
@@ -42,24 +36,21 @@ export function MainApp() {
       (window as any).webkit?.messageHandlers?.BlackSpoonDevHandler?.postMessage?.(
         payload,
       );
-      (window as any).BlackSpoonDevHandler?.postMessage?.(JSON.stringify(payload));
+      (window as any).BlackSpoonDevHandler?.postMessage?.(
+        JSON.stringify(payload),
+      );
     } catch (e) {
       console.error("postMoveTab failed:", e, payload);
     }
   };
 
-  // ✅ 컴포넌트 마운트 시 계좌 정보 로드
   useEffect(() => {
     fetchAccount();
   }, [fetchAccount]);
 
-  // ✅ 원래 지역 판단
   const realHasRegion = !!(user?.regionCode && user.regionCode !== "000000");
-
-  // ✅ 최종: 개발용 강제 활성화 or 임시 활성화가 켜져 있으면 true
   const hasRegion = realHasRegion || tempHasRegion || DEV_FORCE_ZONE_ENABLE;
 
-  // ✅ (옵션) 네이티브 regionSelected 이벤트도 같이 받기
   const onNativeRegionSelected = useCallback((payload: any) => {
     if (payload?.type === "regionSelected") {
       setTempHasRegion(false);
@@ -108,7 +99,6 @@ export function MainApp() {
     }
 
     if (zone === "extreme" || zone === "balance") {
-      // ✅ 개발 중에는 무조건 열리게 (지역 체크/모달 차단 전부 무시)
       if (DEV_FORCE_ZONE_ENABLE) {
         setShowRegionAlert(false);
         setSetupZoneType(zone);
@@ -116,7 +106,6 @@ export function MainApp() {
         return;
       }
 
-      // ✅ 실서비스 모드에서는 지역 체크
       if (!hasRegion) {
         setShowRegionAlert(true);
         return;
@@ -140,9 +129,6 @@ export function MainApp() {
       setShowTomorrowZoneSetup(false);
     } catch (error) {
       console.error("Failed to select zone:", error);
-
-      // ✅ 개발 중 서버 미구현이면 여기서라도 모달 닫히게 (원하면 주석 해제)
-      // if (DEV_FORCE_ZONE_ENABLE) setShowTomorrowZoneSetup(false);
     }
   };
 
@@ -153,7 +139,6 @@ export function MainApp() {
     return "이자존";
   };
 
-  // ✅ 로딩 중이면 로딩 UI 표시
   if (isLoading && !account) {
     return (
       <Layout>
@@ -171,7 +156,6 @@ export function MainApp() {
 
   return (
     <Layout>
-      {/* Zone Setup Modal */}
       {showTomorrowZoneSetup && (
         <TomorrowZoneSetupModal
           zone={setupZoneType}
@@ -182,12 +166,11 @@ export function MainApp() {
         />
       )}
 
-      {/* ✅ 상단(계좌/알림/개발토글)은 고정, "투자중인 존"부터 스크롤 */}
-      <div className="min-h-[100dvh] flex flex-col">
-        {/* ✅ 상단 고정 영역 */}
-        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      {/* ✅ 1) 전체 화면을 꽉 채우고, 윈도우 스크롤을 쓰지 않게 만듦 */}
+      <div className="h-[100dvh] overflow-hidden">
+        {/* ✅ 2) 파란 카드(헤더)는 고정 영역 */}
+        <div className="bg-white">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
-            {/* Balance Card */}
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white mb-4">
               <div className="mb-4">
                 <p className="text-sm text-blue-100">JB 머니</p>
@@ -215,7 +198,6 @@ export function MainApp() {
               </div>
             </div>
 
-            {/* 개발용 토글 */}
             {!realHasRegion && !DEV_FORCE_ZONE_ENABLE && (
               <div className="mb-4 flex items-center gap-2">
                 <button
@@ -234,7 +216,6 @@ export function MainApp() {
               </div>
             )}
 
-            {/* 지역 미선택 알림 (개발 강제 활성화면 안 뜨게 됨) */}
             {!hasRegion && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
@@ -259,11 +240,18 @@ export function MainApp() {
             )}
           </div>
 
-          {/* ✅ 고정 영역 아래 경계선(선택) */}
           <div className="h-px bg-gray-100" />
         </div>
 
-        {/* ✅ 여기부터 스크롤 영역: "투자중인 존"부터 */}
+        {/* ✅ 3) 아래만 스크롤: 반드시 flex-1 + min-h-0 + overflow-y-auto */}
+        <div className="h-full">
+          <div className="h-[calc(100dvh-1px)] flex flex-col">
+            {/* ❗헤더 높이만큼 정확히 빼는 게 베스트인데, height를 모르면 아래 방식이 더 안전 */}
+            {/* 그래서 “flex 레이아웃”으로 헤더 아래 영역만 scroll 되게 구성 */}
+          </div>
+        </div>
+
+        {/* ✅ 실제 스크롤 영역 (헤더 제외) */}
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -280,13 +268,10 @@ export function MainApp() {
                   />
                 </div>
 
-                {/* ✅ 여기서 강제로 true 주면 TomorrowZoneSelector 내부 disable도 풀림 */}
                 <TomorrowZoneSelector
                   tomorrowZone={account?.nextZone || "interest"}
                   onZoneClick={handleTomorrowZoneClick}
-                  showRegionAlert={() => {
-                    setShowRegionAlert(true);
-                  }}
+                  showRegionAlert={() => setShowRegionAlert(true)}
                   hasRegionSelected={
                     DEV_FORCE_ZONE_ENABLE ? true : hasRegion || false
                   }
