@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
 import { Bell, Wallet, AlertTriangle } from "lucide-react";
@@ -9,20 +9,6 @@ import { useAuthStore } from "../../lib/stores/authStore";
 import { useAccountStore } from "../../lib/stores/accountStore";
 
 type Zone = "interest" | "extreme" | "balance";
-
-/**
- * ✅ Native -> Web 통신 규약(권장)
- * - 네이티브(iOS/Android)에서 지역 선택 완료 시 아래 payload를 웹으로 전달:
- *   { type: "regionSelected", regionCode: "123456", regionName?: "전주시" }
- *
- * ✅ 수신 방식(여러 방식 동시 지원)
- * 1) window.postMessage(payload, "*")  (Android/일반)
- * 2) window.dispatchEvent(new CustomEvent("BlackSpoonDevNative", { detail: payload }))
- * 3) window.BlackSpoonDevWeb?.onNativeMessage(payload)  // 네이티브가 직접 호출
- */
-type NativeMessage =
-  | { type: "regionSelected"; regionCode: string; regionName?: string }
-  | { type: string; [key: string]: any };
 
 export function MainApp() {
   const navigate = useNavigate();
@@ -35,11 +21,8 @@ export function MainApp() {
   );
   const [showRegionAlert, setShowRegionAlert] = useState(false);
 
-  // ✅ 지역 선택이 네이티브에서 완료되었는데 authStore의 user가 즉시 갱신되지 않는 환경 대비:
-  // - 웹에서 수신한 regionCode를 로컬에서 override 해서 즉시 UI 활성화
-  const [regionCodeOverride, setRegionCodeOverride] = useState<string | null>(
-    null,
-  );
+  // ✅ 임시: 네이티브에서 regionSelected 못 받아도 "잠깐" 활성화하기 위한 플래그
+  const [tempHasRegion, setTempHasRegion] = useState(false);
 
   // ✅ Native Bridge: moveTab(0~5)
   // 0홈 1지역 2분석 3분석 4ai상담사 5설정
@@ -52,12 +35,9 @@ export function MainApp() {
     };
 
     try {
-      // iOS WKWebView
       (window as any).webkit?.messageHandlers?.BlackSpoonDevHandler?.postMessage?.(
         payload,
       );
-
-      // Android WebView (JavascriptInterface)
       (window as any).BlackSpoonDevHandler?.postMessage?.(JSON.stringify(payload));
     } catch (e) {
       console.error("postMoveTab failed:", e, payload);
@@ -69,86 +49,60 @@ export function MainApp() {
     fetchAccount();
   }, [fetchAccount]);
 
-  // ✅ 현재 지역코드(스토어 user + 로컬 override)
-  const effectiveRegionCode = useMemo(() => {
-    return regionCodeOverride ?? user?.regionCode ?? null;
-  }, [regionCodeOverride, user?.regionCode]);
+  // ✅ 원래 지역 판단
+  const realHasRegion = !!(user?.regionCode && user.regionCode !== "000000");
 
-  // ✅ 지역이 선택되어 있는지 확인
-  const hasRegion = useMemo(() => {
-    return !!effectiveRegionCode && effectiveRegionCode !== "000000";
-  }, [effectiveRegionCode]);
+  // ✅ 최종: "임시 활성화"를 켜면 지역 없어도 true로 간주
+  const hasRegion = realHasRegion || tempHasRegion;
 
-  // ✅ 네이티브에서 regionSelected 메시지 수신 -> 즉시 UI 활성화 + 알림 닫기 + 계좌 갱신
-  const handleNativeMessage = useCallback(
-    (msg: NativeMessage) => {
-      if (!msg || typeof msg !== "object") return;
+  // ✅ (옵션) 네이티브 regionSelected 이벤트도 같이 받으면 자동으로 임시 플래그 꺼줌
+  const onNativeRegionSelected = useCallback((payload: any) => {
+    if (payload?.type === "regionSelected") {
+      // 네이티브에서 진짜로 지역 선택 완료된 거니까 임시 모드 종료
+      setTempHasRegion(false);
+      setShowRegionAlert(false);
+    }
+  }, []);
 
-      if (msg.type === "regionSelected") {
-        const code = (msg as any).regionCode as string | undefined;
-        if (!code) return;
-
-        setRegionCodeOverride(code);
-        setShowRegionAlert(false);
-
-        // 지역 선택 후 계좌/존 정보가 서버/스토어에 반영되는 구조라면 갱신
-        // (UI 즉시 활성화 + 다음 단계에서 selectZone 가능)
-        fetchAccount();
-      }
-    },
-    [fetchAccount],
-  );
-
-  // ✅ 다양한 수신 채널을 모두 붙여서 “지역 탭에서 선택되면 즉시 활성화” 보장
   useEffect(() => {
-    // 1) window.postMessage 수신
-    const onWindowMessage = (event: MessageEvent) => {
+    const onMessage = (e: MessageEvent) => {
       try {
-        // 네이티브가 string으로 주는 경우도 대비
-        const data =
-          typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        handleNativeMessage(data as any);
+        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        onNativeRegionSelected(data);
       } catch {
-        // JSON parse 실패면 원본 그대로 시도
-        handleNativeMessage(event.data as any);
+        onNativeRegionSelected(e.data);
       }
     };
 
-    // 2) CustomEvent("BlackSpoonDevNative") 수신
-    const onCustom = (event: Event) => {
-      const ce = event as CustomEvent;
-      handleNativeMessage(ce.detail as any);
+    const onCustom = (e: Event) => {
+      const ce = e as CustomEvent;
+      onNativeRegionSelected(ce.detail);
     };
 
-    window.addEventListener("message", onWindowMessage);
+    window.addEventListener("message", onMessage);
     window.addEventListener("BlackSpoonDevNative", onCustom as any);
 
-    // 3) 네이티브가 직접 호출할 수 있도록 전역 함수도 하나 열어둠
     (window as any).BlackSpoonDevWeb = (window as any).BlackSpoonDevWeb || {};
-    (window as any).BlackSpoonDevWeb.onNativeMessage = (payload: any) => {
-      handleNativeMessage(payload as any);
+    (window as any).BlackSpoonDevWeb.onNativeMessage = (p: any) => {
+      onNativeRegionSelected(p);
     };
 
     return () => {
-      window.removeEventListener("message", onWindowMessage);
+      window.removeEventListener("message", onMessage);
       window.removeEventListener("BlackSpoonDevNative", onCustom as any);
-
-      // cleanup: 다른 곳에서 쓰는 경우가 있으면 지우지 않는게 안전하지만,
-      // 여기서는 충돌 방지를 위해 함수만 정리
       try {
         if ((window as any).BlackSpoonDevWeb?.onNativeMessage) {
           delete (window as any).BlackSpoonDevWeb.onNativeMessage;
         }
       } catch {}
     };
-  }, [handleNativeMessage]);
+  }, [onNativeRegionSelected]);
 
   const handleTomorrowZoneClick = (zone: Zone) => {
     if (zone === "interest") {
-      // 이자존은 바로 선택
       selectZone({ zone: "interest" });
     } else if (zone === "extreme" || zone === "balance") {
-      // 지역 선택 확인
+      // ✅ 임시 활성화가 켜져 있으면 지역 체크 패스
       if (!hasRegion) {
         setShowRegionAlert(true);
         return;
@@ -169,8 +123,6 @@ export function MainApp() {
         ratio: options?.ratio,
       });
       setShowTomorrowZoneSetup(false);
-      // 선택 후 계좌 정보 다시 갱신(선택 결과가 nextZone 등에 반영되는 경우)
-      fetchAccount();
     } catch (error) {
       console.error("Failed to select zone:", error);
     }
@@ -241,6 +193,25 @@ export function MainApp() {
           </div>
         </div>
 
+        {/* ✅ 임시 활성화 토글(개발용) */}
+        {!realHasRegion && (
+          <div className="mb-4 flex items-center gap-2">
+            <button
+              onClick={() => setTempHasRegion((v) => !v)}
+              className={`px-3 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+                tempHasRegion
+                  ? "bg-green-600 text-white border-green-700"
+                  : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              {tempHasRegion ? "임시 지역 ON (해제)" : "임시로 밸런스존 활성화"}
+            </button>
+            <p className="text-xs text-gray-500">
+              (개발용) regionSelected 연동 전 잠깐 테스트용
+            </p>
+          </div>
+        )}
+
         {/* 지역 미선택 알림 */}
         {!hasRegion && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 flex items-start gap-3">
@@ -255,12 +226,7 @@ export function MainApp() {
               <button
                 onClick={() => {
                   setShowRegionAlert(false);
-
-                  // ✅ "지역 탭(1)"으로 네이티브 탭 이동 요청
                   postMoveTab(1, "go region tab");
-
-                  // 웹 단독 fallback이 필요하면 여기서 navigate("/settings") 등을 조건부로
-                  // (네이티브 존재 여부 체크 후) 처리하면 됨
                 }}
                 className="text-xs font-semibold text-yellow-800 hover:text-yellow-900 underline"
               >
@@ -294,9 +260,7 @@ export function MainApp() {
               showRegionAlert={() => {
                 setShowRegionAlert(true);
               }}
-              // ✅ 여기 때문에 "밸런스존/익스트림존" 카드 활성/비활성이 갈림
-              // ✅ 지역탭에서 선택 완료 메시지를 받으면 hasRegion이 true로 바뀌며 즉시 활성화됨
-              hasRegionSelected={hasRegion}
+              hasRegionSelected={hasRegion || false}
             />
           </div>
 
@@ -391,10 +355,6 @@ export function MainApp() {
                 <button
                   onClick={() => {
                     setShowRegionAlert(false);
-
-                    // ✅ 여기서 "지역 탭(1)"으로 네이티브 탭 이동 요청
-                    // ✅ 지역탭에서 지역 선택 후, 네이티브가 regionSelected 메시지를 웹으로 보내면
-                    // ✅ 이 컴포넌트가 받아서 hasRegion=true -> 밸런스존/익스트림존 즉시 활성화됨
                     postMoveTab(1, "go region tab");
                   }}
                   className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
@@ -408,11 +368,6 @@ export function MainApp() {
                   닫기
                 </button>
               </div>
-
-              {/* (디버그/확인용) */}
-              {/* <div className="mt-4 text-xs text-gray-400">
-                effectiveRegionCode: {String(effectiveRegionCode)}
-              </div> */}
             </div>
           </div>
         </div>
