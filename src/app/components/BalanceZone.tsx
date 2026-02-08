@@ -22,70 +22,6 @@ function pickRandomTheme(): ThemeId {
   return THEMES[idx].id;
 }
 
-function buildReason(theme: (typeof THEMES)[number], ratioLabel: string) {
-  // ✅ 서버/LLM 붙기 전까지는 "샘플 추천 이유" 문구 생성
-  const reasonsByTheme: Record<string, string[]> = {
-    'us-tech': [
-      '최근 기술주 변동성이 크지만, 강한 모멘텀이 이어질 가능성이 있어요.',
-      '대형 IT가 지수에 미치는 영향이 커서 테마 추종이 명확합니다.',
-      '레버리지 전략과 궁합이 좋아 단기 탄력 기대가 큽니다.',
-    ],
-    'china-ev': [
-      '전기차 밸류체인 변동성이 크지만, 뉴스/정책에 따른 탄력이 자주 나옵니다.',
-      '섹터 내 종목들의 방향성이 비슷해 테마 투자 컨셉이 뚜렷해요.',
-      '고위험 구간에서 단기 반등/급등 확률이 비교적 높습니다.',
-    ],
-    'semiconductor': [
-      'AI/서버 수요가 반도체 사이클에 영향을 주는 구간입니다.',
-      '업황 기대감이 커질 때 레버리지 상품의 반응이 빠르게 나타납니다.',
-      '테마 뉴스가 많아 방향성 트레이딩이 가능한 편이에요.',
-    ],
-    'bio': [
-      '임상/승인 이슈로 변동성이 큰 섹터라 익스트림존 성격과 잘 맞습니다.',
-      '테마 내 이벤트 드리븐 상승이 발생할 때 수익 기회가 커요.',
-      '시장 심리가 개선될 때 급격한 리레이팅이 나올 수 있습니다.',
-    ],
-    'energy': [
-      '원유/가스는 이슈에 빠르게 반응해 단기 트레이딩성이 좋아요.',
-      '인플레이션/지정학 변수에 따라 큰 파동이 나오는 테마입니다.',
-      '변동성이 커서 익스트림 비중 전략과 궁합이 좋습니다.',
-    ],
-    'battery': [
-      '수요/공급 뉴스에 따라 가격 탄력이 크게 나타날 수 있어요.',
-      '관련 산업군이 촘촘해 테마 단위로 움직이는 경우가 많습니다.',
-      '레버리지로 단기 기회를 노리기 좋은 섹터입니다.',
-    ],
-    'ai': [
-      'AI 테마는 시장의 관심이 강할 때 빠른 추세가 나오는 편입니다.',
-      '클라우드/AI 인프라 투자 확대 기대가 가격에 반영될 수 있어요.',
-      '익스트림 전략에서 가장 자주 활용되는 대표 성장 테마입니다.',
-    ],
-    'finance': [
-      '금리/경기 기대 변화에 따라 섹터 방향성이 비교적 선명하게 나옵니다.',
-      '실적 시즌에는 테마 단위로 반응이 커질 수 있어요.',
-      '이벤트 구간에서 익스트림 비중 전략과 맞는 구간이 생깁니다.',
-    ],
-    'reits': [
-      '금리 방향성에 따라 테마 변동성이 확대될 수 있습니다.',
-      '방어/리스크온 전환 시점에 테마 단위 반응이 나올 수 있어요.',
-      '변동성 구간에서 단기 리밸런싱에 활용 가능합니다.',
-    ],
-    'commodity': [
-      '원자재는 매크로 뉴스에 즉각 반응해 변동성이 큰 편이에요.',
-      '금/은/구리 등은 테마 자체가 명확해 추종이 쉽습니다.',
-      '단기 트렌드가 생길 때 레버리지 구간 수익 기회가 큽니다.',
-    ],
-  };
-
-  const pool = reasonsByTheme[theme.id] ?? [
-    '최근 변동성이 큰 테마로, 익스트림존 성격과 잘 맞습니다.',
-    '단기 모멘텀이 생기기 쉬워 고위험 구간에서 기회를 노릴 수 있어요.',
-  ];
-
-  const picked = pool[Math.floor(Math.random() * pool.length)];
-  return `(${ratioLabel} 기준) ${picked}`;
-}
-
 export function BalanceZone() {
   const [extremeRatio, setExtremeRatio] = useState(25); // 오늘 익스트림존 비율
   const [tomorrowExtremeRatio, setTomorrowExtremeRatio] = useState(25); // 내일 적용될 익스트림 비율
@@ -98,30 +34,9 @@ export function BalanceZone() {
   const investmentReturn = 3.2;
 
   const ratioOptions = [
-    {
-      value: 25,
-      label: '안정형',
-      extreme: 25,
-      interest: 75,
-      description: '익스트림 25% · 이자 75%',
-      color: 'blue',
-    },
-    {
-      value: 50,
-      label: '균형형',
-      extreme: 50,
-      interest: 50,
-      description: '익스트림 50% · 이자 50%',
-      color: 'purple',
-    },
-    {
-      value: 75,
-      label: '공격형',
-      extreme: 75,
-      interest: 25,
-      description: '익스트림 75% · 이자 25%',
-      color: 'orange',
-    },
+    { value: 25, label: '안정형', extreme: 25, interest: 75, description: '익스트림 25% · 이자 75%', color: 'blue' },
+    { value: 50, label: '균형형', extreme: 50, interest: 50, description: '익스트림 50% · 이자 50%', color: 'purple' },
+    { value: 75, label: '공격형', extreme: 75, interest: 25, description: '익스트림 75% · 이자 25%', color: 'orange' },
   ] as const;
 
   const tomorrowLabel = useMemo(() => {
@@ -132,10 +47,8 @@ export function BalanceZone() {
   // ✅ AI 테마 추천 (샘플)
   // =========================
   const [aiThemeId, setAiThemeId] = useState<ThemeId | null>(null);
-  const [aiReason, setAiReason] = useState<string>('');
   const [aiOpen, setAiOpen] = useState<boolean>(true);
 
-  // ✅ 버튼 누르면 "하단 AI 추천 영역"으로 자동 스크롤
   const aiSectionRef = useRef<HTMLDivElement | null>(null);
 
   const selectedTheme = useMemo(() => {
@@ -144,16 +57,13 @@ export function BalanceZone() {
 
   useEffect(() => {
     if (!aiThemeId) return;
+    // ✅ 추천 생성되면 자동 스크롤
     aiSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [aiThemeId]);
 
   const handleAiRecommend = () => {
     const next = pickRandomTheme();
-    const theme = THEMES.find(t => t.id === next)!;
-    const reason = buildReason(theme, tomorrowLabel);
-
     setAiThemeId(next);
-    setAiReason(reason);
     setAiOpen(true);
   };
 
@@ -283,17 +193,13 @@ export function BalanceZone() {
                   className="absolute left-0 top-0 h-full bg-blue-500 flex items-center justify-center"
                   style={{ width: `${option.interest}%` }}
                 >
-                  {option.interest > 15 && (
-                    <span className="text-xs font-medium text-white">{option.interest}%</span>
-                  )}
+                  {option.interest > 15 && <span className="text-xs font-medium text-white">{option.interest}%</span>}
                 </div>
                 <div
                   className="absolute right-0 top-0 h-full bg-orange-500 flex items-center justify-center"
                   style={{ width: `${option.extreme}%` }}
                 >
-                  {option.extreme > 15 && (
-                    <span className="text-xs font-medium text-white">{option.extreme}%</span>
-                  )}
+                  {option.extreme > 15 && <span className="text-xs font-medium text-white">{option.extreme}%</span>}
                 </div>
               </div>
             </button>
@@ -301,25 +207,22 @@ export function BalanceZone() {
         </div>
       </div>
 
-      {/* ✅ AI 추천: "공격형(비율 선택)" 카드 아래로 완전히 분리해서 하단에 배치 */}
+      {/* ✅ AI 추천: 추천 이유/시장분석 완전 삭제(테마만 보여줌) */}
       <div ref={aiSectionRef} className="bg-white rounded-2xl p-6 border border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-900">AI 추천</h3>
 
-          {/* ✅ 버튼 누르면 이 영역으로 스크롤되고, 추천된 테마가 "AI 추천 옆"에 노출 */}
+          {/* ✅ AI 추천 옆에 랜덤 테마(아이콘+이름) */}
           {selectedTheme ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">AI 추천</span>
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${selectedTheme.color} text-white`}>
-                {selectedTheme.icon} {selectedTheme.name}
-              </span>
-            </div>
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${selectedTheme.color} text-white`}>
+              {selectedTheme.icon} {selectedTheme.name}
+            </span>
           ) : (
-            <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">AI 추천</span>
+            <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-1 rounded-full">미선택</span>
           )}
         </div>
 
-        {/* ✅ 버튼 텍스트: "AI를 통한 테마 추천받기" */}
+        {/* ✅ 버튼: AI를 통한 테마 추천받기 */}
         <button
           onClick={handleAiRecommend}
           className="w-full rounded-xl border-2 border-gray-200 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-black hover:to-gray-900 text-white p-4 transition-all"
@@ -335,7 +238,7 @@ export function BalanceZone() {
               </div>
             </div>
 
-            {/* ✅ 버튼 우측에도 선택된 테마 배지 노출(아이콘 포함) */}
+            {/* 버튼 우측에도 동일하게 테마 배지 */}
             {selectedTheme ? (
               <span className={`text-xs font-semibold px-3 py-1 rounded-full ${selectedTheme.color} text-white`}>
                 {selectedTheme.icon} {selectedTheme.name}
@@ -346,13 +249,9 @@ export function BalanceZone() {
           </div>
         </button>
 
-        {/* ✅ 추천 결과 패널 */}
-        <div
-          className={`mt-3 rounded-2xl border transition-all overflow-hidden ${
-            selectedTheme ? 'border-gray-200 bg-white' : 'border-transparent bg-transparent'
-          }`}
-        >
-          {selectedTheme && (
+        {/* ✅ 펼치기/접기 UI는 남기되, 내용(추천이유/시장분석)은 제거 */}
+        {selectedTheme && (
+          <div className="mt-3 rounded-2xl border border-gray-200 bg-white overflow-hidden">
             <div className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -381,12 +280,10 @@ export function BalanceZone() {
                 </button>
               </div>
 
+              {/* ✅ 내용 제거: 배지(비율/자동적용)만 남김 */}
               <div className={`transition-all ${aiOpen ? 'mt-4 opacity-100' : 'mt-0 opacity-0 h-0 overflow-hidden'}`}>
                 <div className="rounded-xl bg-gray-50 border border-gray-200 p-4">
-                  <p className="text-sm font-semibold text-gray-900 mb-1">추천 이유</p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{aiReason}</p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <span className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
                       이자존 비율 {100 - tomorrowExtremeRatio}%
                     </span>
@@ -404,8 +301,8 @@ export function BalanceZone() {
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Amount Breakdown */}
