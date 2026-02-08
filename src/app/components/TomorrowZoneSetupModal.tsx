@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  TrendingUp,
-  Scale,
-  Check,
-  X,
-  Sparkles,
-} from "lucide-react";
+import { TrendingUp, Scale, Check, X, Sparkles } from "lucide-react";
 
 type Zone = "interest" | "extreme" | "balance";
 
@@ -76,23 +70,23 @@ const RATIO_OPTIONS = [
   {
     value: 25,
     label: "안정형",
-    extreme: 25,
-    interest: 75,
-    description: "익스트림 25% · 이자 75%",
+    principal: 25,
+    interest: 100,
+    description: "원금 25% + 이자 100% (포인트 원금을 이자로 이동) 투자",
   },
   {
     value: 50,
     label: "균형형",
-    extreme: 50,
-    interest: 50,
-    description: "익스트림 50% · 이자 50%",
+    principal: 50,
+    interest: 100,
+    description: "원금 50% + 이자 100% (포인트 원금을 이자로 이동) 투자",
   },
   {
     value: 75,
     label: "공격형",
-    extreme: 75,
-    interest: 25,
-    description: "익스트림 75% · 이자 25%",
+    principal: 75,
+    interest: 100,
+    description: "원금 75% + 이자 100% (포인트 원금을 이자로 이동) 투자",
   },
 ];
 
@@ -116,8 +110,7 @@ export function TomorrowZoneSetupModal({
 }: TomorrowZoneSetupModalProps) {
   const [selectedTheme, setSelectedTheme] = useState("us-tech");
   const [selectedRatio, setSelectedRatio] = useState(25);
-  const [showAIRecommendation, setShowAIRecommendation] =
-    useState(false);
+  const [showAIRecommendation, setShowAIRecommendation] = useState(false);
   const [aiRecommendation, setAiRecommendation] =
     useState<AIRecommendation | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
@@ -156,9 +149,10 @@ export function TomorrowZoneSetupModal({
 
   const handleSave = () => {
     if (zone === "extreme") {
-      const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
+      const selectedThemeData = THEMES.find((t) => t.id === selectedTheme);
       onSave(zone, { theme: selectedThemeData?.name });
     } else {
+      // ✅ ratio는 "원금 투자 비율" (25/50/75)로 저장
       onSave(zone, { ratio: selectedRatio });
     }
   };
@@ -201,13 +195,11 @@ export function TomorrowZoneSetupModal({
                   className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
                 >
                   <Sparkles className="w-5 h-5" />
-                  {isLoadingAI
-                    ? "AI 분석 중..."
-                    : "AI를 통한 테마 추천받기"}
+                  {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
                 </button>
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  AI 추천은 참고용 보조 기능이며, 투자 결정은
-                  고객님의 판단에 따라 이루어집니다.
+                  AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에
+                  따라 이루어집니다.
                 </p>
               </div>
 
@@ -216,9 +208,7 @@ export function TomorrowZoneSetupModal({
                 <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
                   <div className="flex items-center gap-2 mb-3">
                     <Sparkles className="w-5 h-5 text-purple-600" />
-                    <h4 className="font-semibold text-purple-900">
-                      AI 추천
-                    </h4>
+                    <h4 className="font-semibold text-purple-900">AI 추천</h4>
                   </div>
                   <div className="space-y-2">
                     <div className="p-3 bg-white/80 rounded-lg">
@@ -242,9 +232,7 @@ export function TomorrowZoneSetupModal({
               )}
 
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">
-                  테마 선택
-                </h3>
+                <h3 className="font-semibold text-gray-900 mb-1">테마 선택</h3>
                 <p className="text-sm text-gray-600 mb-4">
                   투자할 테마를 선택하세요
                 </p>
@@ -262,9 +250,7 @@ export function TomorrowZoneSetupModal({
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <span className="text-2xl sm:text-3xl">
-                        {theme.icon}
-                      </span>
+                      <span className="text-2xl sm:text-3xl">{theme.icon}</span>
                       {selectedTheme === theme.id && (
                         <div className="p-0.5 bg-orange-500 rounded-full">
                           <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
@@ -341,13 +327,11 @@ export function TomorrowZoneSetupModal({
                 className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
               >
                 <Sparkles className="w-5 h-5" />
-                {isLoadingAI
-                  ? "AI 분석 중..."
-                  : "AI를 통한 추천받기"}
+                {isLoadingAI ? "AI 분석 중..." : "AI를 통한 추천받기"}
               </button>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                AI 추천은 참고용 보조 기능이며, 투자 결정은
-                고객님의 판단에 따라 이루어집니다.
+                AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에
+                따라 이루어집니다.
               </p>
             </div>
 
@@ -356,9 +340,7 @@ export function TomorrowZoneSetupModal({
               <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-5 h-5 text-purple-600" />
-                  <h4 className="font-semibold text-purple-900">
-                    AI 추천
-                  </h4>
+                  <h4 className="font-semibold text-purple-900">AI 추천</h4>
                 </div>
                 <div className="space-y-2">
                   <div className="p-3 bg-white/80 rounded-lg">
@@ -382,11 +364,10 @@ export function TomorrowZoneSetupModal({
             )}
 
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">
-                투자 비율 선택
-              </h3>
+              <h3 className="font-semibold text-gray-900 mb-1">투자 비율 선택</h3>
               <p className="text-sm text-gray-600 mb-4">
-                익스트림존과 이자존의 비율을 선택하세요
+                원금 투자 비율을 선택하세요 (이자 투자 100% 고정, 포인트 원금을
+                이자로 이동)
               </p>
             </div>
 
@@ -419,26 +400,41 @@ export function TomorrowZoneSetupModal({
                       </div>
                     )}
                   </div>
-                  <div className="relative h-6 sm:h-8 bg-gray-100 rounded-lg overflow-hidden">
-                    <div
-                      className="absolute left-0 top-0 h-full bg-blue-500 flex items-center justify-center"
-                      style={{ width: `${option.interest}%` }}
-                    >
-                      {option.interest > 15 && (
-                        <span className="text-xs sm:text-sm font-medium text-white">
-                          {option.interest}%
-                        </span>
-                      )}
+
+                  {/* ✅ 표시를 "원금 투자" + "이자 투자(100% 고정)" 2줄로 변경 */}
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          원금 투자
+                        </p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-900">
+                          {option.principal}%
+                        </p>
+                      </div>
+                      <div className="relative h-2.5 sm:h-3 bg-gray-100 rounded-lg overflow-hidden">
+                        <div
+                          className="absolute left-0 top-0 h-full bg-purple-500"
+                          style={{ width: `${option.principal}%` }}
+                        />
+                      </div>
                     </div>
-                    <div
-                      className="absolute right-0 top-0 h-full bg-orange-500 flex items-center justify-center"
-                      style={{ width: `${option.extreme}%` }}
-                    >
-                      {option.extreme > 15 && (
-                        <span className="text-xs sm:text-sm font-medium text-white">
-                          {option.extreme}%
-                        </span>
-                      )}
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs sm:text-sm text-gray-600">
+                          이자 투자 (고정)
+                        </p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-900">
+                          {option.interest}%
+                        </p>
+                      </div>
+                      <div className="relative h-2.5 sm:h-3 bg-gray-100 rounded-lg overflow-hidden">
+                        <div
+                          className="absolute left-0 top-0 h-full bg-orange-500"
+                          style={{ width: `${option.interest}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </button>
