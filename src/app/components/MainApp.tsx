@@ -160,7 +160,17 @@ export function MainApp() {
                 익스트림존과 밸런스존을 이용하시려면 지역을 먼저 선택해주세요.
               </p>
               <button
-                onClick={() => navigate("/settings")}
+                // onClick={() => navigate("/settings")}
+                  onClick={() => {
+                    setShowRegionAlert(false);
+
+                    // ✅ 여기서 "지역 탭(1)"으로 네이티브 탭 이동 요청
+                    postMoveTab(1, "go region tab");
+
+                    // (웹 단독 실행 대비 fallback)
+                    // 네이티브가 없을 때만 설정 화면으로 이동시키고 싶으면 아래처럼 조건 처리도 가능
+                    // navigate("/settings");
+                  }}
                 className="text-xs font-semibold text-yellow-800 hover:text-yellow-900 underline"
               >
                 지역 선택하러 가기
