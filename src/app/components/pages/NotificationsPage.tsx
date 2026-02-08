@@ -37,7 +37,7 @@ export function NotificationsPage() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">푸시 알림</p>
-                <p className="text-sm text-gray-600">모든 알림 수신</p>
+                <p className="text-sm text-gray-600">모든 알림222 수신</p>
               </div>
             </div>
             <button
