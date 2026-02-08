@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
 import { Bell, Wallet, AlertTriangle } from "lucide-react";
@@ -10,6 +10,20 @@ import { useAccountStore } from "../../lib/stores/accountStore";
 
 type Zone = "interest" | "extreme" | "balance";
 
+/**
+ * ✅ Native -> Web 통신 규약(권장)
+ * - 네이티브(iOS/Android)에서 지역 선택 완료 시 아래 payload를 웹으로 전달:
+ *   { type: "regionSelected", regionCode: "123456", regionName?: "전주시" }
+ *
+ * ✅ 수신 방식(여러 방식 동시 지원)
+ * 1) window.postMessage(payload, "*")  (Android/일반)
+ * 2) window.dispatchEvent(new CustomEvent("BlackSpoonDevNative", { detail: payload }))
+ * 3) window.BlackSpoonDevWeb?.onNativeMessage(payload)  // 네이티브가 직접 호출
+ */
+type NativeMessage =
+  | { type: "regionSelected"; regionCode: string; regionName?: string }
+  | { type: string; [key: string]: any };
+
 export function MainApp() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -20,6 +34,12 @@ export function MainApp() {
     "extreme",
   );
   const [showRegionAlert, setShowRegionAlert] = useState(false);
+
+  // ✅ 지역 선택이 네이티브에서 완료되었는데 authStore의 user가 즉시 갱신되지 않는 환경 대비:
+  // - 웹에서 수신한 regionCode를 로컬에서 override 해서 즉시 UI 활성화
+  const [regionCodeOverride, setRegionCodeOverride] = useState<string | null>(
+    null,
+  );
 
   // ✅ Native Bridge: moveTab(0~5)
   // 0홈 1지역 2분석 3분석 4ai상담사 5설정
@@ -44,13 +64,84 @@ export function MainApp() {
     }
   };
 
-  // 컴포넌트 마운트 시 계좌 정보 로드
+  // ✅ 컴포넌트 마운트 시 계좌 정보 로드
   useEffect(() => {
     fetchAccount();
   }, [fetchAccount]);
 
-  // 지역이 선택되어 있는지 확인
-  const hasRegion = user?.regionCode && user.regionCode !== "000000";
+  // ✅ 현재 지역코드(스토어 user + 로컬 override)
+  const effectiveRegionCode = useMemo(() => {
+    return regionCodeOverride ?? user?.regionCode ?? null;
+  }, [regionCodeOverride, user?.regionCode]);
+
+  // ✅ 지역이 선택되어 있는지 확인
+  const hasRegion = useMemo(() => {
+    return !!effectiveRegionCode && effectiveRegionCode !== "000000";
+  }, [effectiveRegionCode]);
+
+  // ✅ 네이티브에서 regionSelected 메시지 수신 -> 즉시 UI 활성화 + 알림 닫기 + 계좌 갱신
+  const handleNativeMessage = useCallback(
+    (msg: NativeMessage) => {
+      if (!msg || typeof msg !== "object") return;
+
+      if (msg.type === "regionSelected") {
+        const code = (msg as any).regionCode as string | undefined;
+        if (!code) return;
+
+        setRegionCodeOverride(code);
+        setShowRegionAlert(false);
+
+        // 지역 선택 후 계좌/존 정보가 서버/스토어에 반영되는 구조라면 갱신
+        // (UI 즉시 활성화 + 다음 단계에서 selectZone 가능)
+        fetchAccount();
+      }
+    },
+    [fetchAccount],
+  );
+
+  // ✅ 다양한 수신 채널을 모두 붙여서 “지역 탭에서 선택되면 즉시 활성화” 보장
+  useEffect(() => {
+    // 1) window.postMessage 수신
+    const onWindowMessage = (event: MessageEvent) => {
+      try {
+        // 네이티브가 string으로 주는 경우도 대비
+        const data =
+          typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        handleNativeMessage(data as any);
+      } catch {
+        // JSON parse 실패면 원본 그대로 시도
+        handleNativeMessage(event.data as any);
+      }
+    };
+
+    // 2) CustomEvent("BlackSpoonDevNative") 수신
+    const onCustom = (event: Event) => {
+      const ce = event as CustomEvent;
+      handleNativeMessage(ce.detail as any);
+    };
+
+    window.addEventListener("message", onWindowMessage);
+    window.addEventListener("BlackSpoonDevNative", onCustom as any);
+
+    // 3) 네이티브가 직접 호출할 수 있도록 전역 함수도 하나 열어둠
+    (window as any).BlackSpoonDevWeb = (window as any).BlackSpoonDevWeb || {};
+    (window as any).BlackSpoonDevWeb.onNativeMessage = (payload: any) => {
+      handleNativeMessage(payload as any);
+    };
+
+    return () => {
+      window.removeEventListener("message", onWindowMessage);
+      window.removeEventListener("BlackSpoonDevNative", onCustom as any);
+
+      // cleanup: 다른 곳에서 쓰는 경우가 있으면 지우지 않는게 안전하지만,
+      // 여기서는 충돌 방지를 위해 함수만 정리
+      try {
+        if ((window as any).BlackSpoonDevWeb?.onNativeMessage) {
+          delete (window as any).BlackSpoonDevWeb.onNativeMessage;
+        }
+      } catch {}
+    };
+  }, [handleNativeMessage]);
 
   const handleTomorrowZoneClick = (zone: Zone) => {
     if (zone === "interest") {
@@ -78,6 +169,8 @@ export function MainApp() {
         ratio: options?.ratio,
       });
       setShowTomorrowZoneSetup(false);
+      // 선택 후 계좌 정보 다시 갱신(선택 결과가 nextZone 등에 반영되는 경우)
+      fetchAccount();
     } catch (error) {
       console.error("Failed to select zone:", error);
     }
@@ -90,7 +183,7 @@ export function MainApp() {
     return "이자존";
   };
 
-  // 로딩 중이면 로딩 UI 표시
+  // ✅ 로딩 중이면 로딩 UI 표시
   if (isLoading && !account) {
     return (
       <Layout>
@@ -160,17 +253,15 @@ export function MainApp() {
                 익스트림존과 밸런스존을 이용하시려면 지역을 먼저 선택해주세요.
               </p>
               <button
-                // onClick={() => navigate("/settings")}
-                  onClick={() => {
-                    setShowRegionAlert(false);
+                onClick={() => {
+                  setShowRegionAlert(false);
 
-                    // ✅ 여기서 "지역 탭(1)"으로 네이티브 탭 이동 요청
-                    postMoveTab(1, "go region tab");
+                  // ✅ "지역 탭(1)"으로 네이티브 탭 이동 요청
+                  postMoveTab(1, "go region tab");
 
-                    // (웹 단독 실행 대비 fallback)
-                    // 네이티브가 없을 때만 설정 화면으로 이동시키고 싶으면 아래처럼 조건 처리도 가능
-                    // navigate("/settings");
-                  }}
+                  // 웹 단독 fallback이 필요하면 여기서 navigate("/settings") 등을 조건부로
+                  // (네이티브 존재 여부 체크 후) 처리하면 됨
+                }}
                 className="text-xs font-semibold text-yellow-800 hover:text-yellow-900 underline"
               >
                 지역 선택하러 가기
@@ -203,7 +294,9 @@ export function MainApp() {
               showRegionAlert={() => {
                 setShowRegionAlert(true);
               }}
-              hasRegionSelected={hasRegion || false}
+              // ✅ 여기 때문에 "밸런스존/익스트림존" 카드 활성/비활성이 갈림
+              // ✅ 지역탭에서 선택 완료 메시지를 받으면 hasRegion이 true로 바뀌며 즉시 활성화됨
+              hasRegionSelected={hasRegion}
             />
           </div>
 
@@ -300,11 +393,9 @@ export function MainApp() {
                     setShowRegionAlert(false);
 
                     // ✅ 여기서 "지역 탭(1)"으로 네이티브 탭 이동 요청
+                    // ✅ 지역탭에서 지역 선택 후, 네이티브가 regionSelected 메시지를 웹으로 보내면
+                    // ✅ 이 컴포넌트가 받아서 hasRegion=true -> 밸런스존/익스트림존 즉시 활성화됨
                     postMoveTab(1, "go region tab");
-
-                    // (웹 단독 실행 대비 fallback)
-                    // 네이티브가 없을 때만 설정 화면으로 이동시키고 싶으면 아래처럼 조건 처리도 가능
-                    // navigate("/settings");
                   }}
                   className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
                 >
@@ -317,6 +408,11 @@ export function MainApp() {
                   닫기
                 </button>
               </div>
+
+              {/* (디버그/확인용) */}
+              {/* <div className="mt-4 text-xs text-gray-400">
+                effectiveRegionCode: {String(effectiveRegionCode)}
+              </div> */}
             </div>
           </div>
         </div>
