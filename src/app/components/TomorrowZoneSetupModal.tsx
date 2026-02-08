@@ -116,7 +116,7 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                   className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
                 >
                   <Sparkles className="w-5 h-5" />
-                  {isLoadingAI ? "AI 분석 중..." : "AI를 통한 추천받기"}
+                  {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
                 </button>
                 <p className="text-xs text-gray-500 mt-2 text-center">
                   AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라 이루어집니다.
@@ -232,7 +232,7 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                 className="w-full p-4 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-black hover:to-gray-900 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
               >
                 <Sparkles className="w-5 h-5" />
-                {isLoadingAI ? "AI 분석 중..." : "AI를 통한 추천받기"}
+                {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
               </button>
 
               {/* ✅ 안내문 유지/삭제는 니 취향. 일단 유지 */}
