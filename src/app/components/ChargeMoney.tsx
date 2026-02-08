@@ -40,23 +40,25 @@ export function ChargeMoney() {
   }
 
   return (
-    {/* 상단 헤더 */}
-  <div className="relative flex items-center h-12 mb-2">
-        {/* 뒤로가기 */}
-        <div className="absolute left-0">
-          <HistoryBackButton />
+    <div className="space-y-6">
+      {/* 상단 헤더 */}
+      <div className="space-y-2">
+        <div className="relative flex items-center h-12">
+          {/* 뒤로가기 */}
+          <div className="absolute left-0">
+            <HistoryBackButton />
+          </div>
+
+          {/* 타이틀 (정중앙) */}
+          <h2 className="w-full text-center text-lg font-bold text-gray-900">
+            JB머니 금고 충전
+          </h2>
         </div>
 
-        {/* 타이틀 */}
-        <h2 className="w-full text-center text-lg font-bold text-gray-900">
-          JB머니 금고 충전
-        </h2>
+        <p className="text-sm text-gray-600 text-center">
+          JB계좌에서 JB머니 금고로 금액을 이체합니다
+        </p>
       </div>
-
-      <p className="text-sm text-gray-600 text-center mb-4">
-        JB계좌에서 JB머니 금고로 금액을 이체합니다
-      </p>
-  </div>
 
       {/* 계좌 정보 */}
       <div className="grid grid-cols-2 gap-4">
@@ -117,9 +119,7 @@ export function ChargeMoney() {
 
       {/* 안내사항 */}
       <div className="bg-blue-50 rounded-xl p-4">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">
-          충전 안내
-        </h4>
+        <h4 className="text-sm font-medium text-blue-900 mb-2">충전 안내</h4>
         <ul className="space-y-1 text-xs text-blue-700">
           <li>• 최소 충전 금액: 10,000원</li>
           <li>• 수수료: 무료</li>
