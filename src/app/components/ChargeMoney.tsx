@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { ArrowRight, Check, Wallet, Building2 } from 'lucide-react';
+import { useState } from "react";
+import { ArrowRight, Check, Wallet, Building2 } from "lucide-react";
+import { HistoryBackButton } from "./components/HistoryBackButton";
 
 export function ChargeMoney() {
-  const [step, setStep] = useState<'input' | 'complete'>('input');
-  const [amount, setAmount] = useState('');
+  const [step, setStep] = useState<"input" | "complete">("input");
+  const [amount, setAmount] = useState("");
 
   const quickAmounts = [10000, 50000, 100000, 500000, 1000000];
 
@@ -13,48 +14,44 @@ export function ChargeMoney() {
 
   const handleCharge = () => {
     if (amount && parseInt(amount) > 0) {
-      setStep('complete');
+      setStep("complete");
       setTimeout(() => {
-        setStep('input');
-        setAmount('');
+        setStep("input");
+        setAmount("");
       }, 3000);
     }
   };
 
-  if (step === 'complete') {
+  if (step === "complete") {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-6">
         <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
           <Check className="w-10 h-10 text-green-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">충전이 완료되었습니다</h2>
-        <p className="text-gray-600 mb-8">JB머니 금고에 {parseInt(amount).toLocaleString()}원이 입금되었습니다</p>
-        
-        <div className="w-full max-w-md bg-white rounded-2xl p-6 border border-gray-200">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-              <span className="text-sm text-gray-600">충전 금액</span>
-              <span className="font-semibold text-gray-900">{parseInt(amount).toLocaleString()}원</span>
-            </div>
-            <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-              <span className="text-sm text-gray-600">충전 일시</span>
-              <span className="text-sm text-gray-900">2026.02.04 09:41</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">충전 후 잔액</span>
-              <span className="font-semibold text-blue-600">{(15750000 + parseInt(amount)).toLocaleString()}원</span>
-            </div>
-          </div>
-        </div>
+
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          충전이 완료되었습니다
+        </h2>
+        <p className="text-gray-600 mb-8">
+          JB머니 금고에 {parseInt(amount).toLocaleString()}원이 입금되었습니다
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* 🔙 뒤로가기 */}
+      <HistoryBackButton />
+
+      {/* 타이틀 */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">JB머니 금고 충전</h2>
-        <p className="text-sm text-gray-600">JB계좌에서 JB머니 금고로 금액을 이체합니다</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          JB머니 금고 충전
+        </h2>
+        <p className="text-sm text-gray-600">
+          JB계좌에서 JB머니 금고로 금액을 이체합니다
+        </p>
       </div>
 
       {/* 계좌 정보 */}
@@ -67,7 +64,7 @@ export function ChargeMoney() {
           <p className="font-semibold text-gray-900">JB 입출금 계좌</p>
           <p className="text-sm text-gray-600 mt-1">잔액: 25,340,000원</p>
         </div>
-        
+
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
           <div className="flex items-center gap-2 mb-3">
             <Wallet className="w-5 h-5" />
@@ -80,7 +77,9 @@ export function ChargeMoney() {
 
       {/* 금액 입력 */}
       <div className="bg-white rounded-2xl p-6 border border-gray-200">
-        <label className="block text-sm font-medium text-gray-700 mb-3">충전 금액</label>
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          충전 금액
+        </label>
         <input
           type="number"
           value={amount}
@@ -88,7 +87,7 @@ export function ChargeMoney() {
           placeholder="금액을 입력하세요"
           className="w-full px-4 py-4 text-2xl font-bold text-gray-900 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
         />
-        
+
         <div className="mt-4 grid grid-cols-3 gap-2">
           {quickAmounts.map((value) => (
             <button
@@ -96,7 +95,7 @@ export function ChargeMoney() {
               onClick={() => handleQuickAmount(value)}
               className="px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-medium text-gray-700 transition-colors"
             >
-              +{(value / 10000)}만원
+              +{value / 10000}만원
             </button>
           ))}
         </div>
@@ -114,7 +113,9 @@ export function ChargeMoney() {
 
       {/* 안내사항 */}
       <div className="bg-blue-50 rounded-xl p-4">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">충전 안내</h4>
+        <h4 className="text-sm font-medium text-blue-900 mb-2">
+          충전 안내
+        </h4>
         <ul className="space-y-1 text-xs text-blue-700">
           <li>• 최소 충전 금액: 10,000원</li>
           <li>• 수수료: 무료</li>
