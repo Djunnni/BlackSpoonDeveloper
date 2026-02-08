@@ -4,66 +4,16 @@ import { TrendingUp, Scale, Check, X, Sparkles } from "lucide-react";
 type Zone = "interest" | "extreme" | "balance";
 
 const THEMES = [
-  {
-    id: "us-tech",
-    name: "미국 테크",
-    icon: "🇺🇸",
-    description: "나스닥100, S&P500 IT 섹터",
-  },
-  {
-    id: "china-ev",
-    name: "중국 전기차",
-    icon: "🚗",
-    description: "BYD, NIO 등 전기차",
-  },
-  {
-    id: "semiconductor",
-    name: "반도체",
-    icon: "💾",
-    description: "글로벌 반도체 산업",
-  },
-  {
-    id: "bio",
-    name: "바이오/제약",
-    icon: "💊",
-    description: "헬스케어 & 바이오",
-  },
-  {
-    id: "energy",
-    name: "에너지",
-    icon: "⚡",
-    description: "원유, 천연가스, 신재생",
-  },
-  {
-    id: "battery",
-    name: "2차전지",
-    icon: "🔋",
-    description: "배터리 소재 & 완제품",
-  },
-  {
-    id: "ai",
-    name: "AI/클라우드",
-    icon: "🤖",
-    description: "인공지능 & 클라우드",
-  },
-  {
-    id: "finance",
-    name: "금융",
-    icon: "🏦",
-    description: "은행, 증권, 보험",
-  },
-  {
-    id: "reits",
-    name: "리츠",
-    icon: "🏢",
-    description: "부동산 투자신탁",
-  },
-  {
-    id: "commodity",
-    name: "원자재",
-    icon: "⛏️",
-    description: "금, 은, 구리 등",
-  },
+  { id: "us-tech", name: "미국 테크", icon: "🇺🇸", description: "나스닥100, S&P500 IT 섹터" },
+  { id: "china-ev", name: "중국 전기차", icon: "🚗", description: "BYD, NIO 등 전기차" },
+  { id: "semiconductor", name: "반도체", icon: "💾", description: "글로벌 반도체 산업" },
+  { id: "bio", name: "바이오/제약", icon: "💊", description: "헬스케어 & 바이오" },
+  { id: "energy", name: "에너지", icon: "⚡", description: "원유, 천연가스, 신재생" },
+  { id: "battery", name: "2차전지", icon: "🔋", description: "배터리 소재 & 완제품" },
+  { id: "ai", name: "AI/클라우드", icon: "🤖", description: "인공지능 & 클라우드" },
+  { id: "finance", name: "금융", icon: "🏦", description: "은행, 증권, 보험" },
+  { id: "reits", name: "리츠", icon: "🏢", description: "부동산 투자신탁" },
+  { id: "commodity", name: "원자재", icon: "⛏️", description: "금, 은, 구리 등" },
 ];
 
 const RATIO_OPTIONS = [
@@ -72,21 +22,24 @@ const RATIO_OPTIONS = [
     label: "안정형",
     principal: 25,
     interest: 100,
-    description: "원금 25% + 이자 100% (포인트로 자동 전환)",
+    headline: "원금 25% + 이자 100%",
+    note: "(포인트 이자로 자동 전환)",
   },
   {
     value: 50,
     label: "균형형",
     principal: 50,
     interest: 100,
-    description: "원금 50% + 이자 100% (포인트로 자동 전환)",
+    headline: "원금 50% + 이자 100%",
+    note: "(포인트 이자로 자동 전환)",
   },
   {
     value: 75,
     label: "공격형",
     principal: 75,
     interest: 100,
-    description: "원금 75% + 이자 100% (포인트로 자동 전환)",
+    headline: "원금 75% + 이자 100%",
+    note: "(포인트 이자로 자동 전환)",
   },
 ];
 
@@ -134,8 +87,7 @@ export function TomorrowZoneSetupModal({
     } else {
       const mockRecommendation: AIRecommendation = {
         ratioValue: 50,
-        reason:
-          "현재 시장 변동성이 중간 수준이므로, 균형형 투자 비율이 적합합니다.",
+        reason: "현재 시장 변동성이 중간 수준이므로, 균형형 투자 비율이 적합합니다.",
         marketAnalysis:
           "최근 시장 지표를 분석한 결과, 안정성과 수익성의 균형을 맞춘 50:50 비율이 가장 효율적인 위험-수익 구조를 제공할 것으로 예상됩니다.",
       };
@@ -152,7 +104,6 @@ export function TomorrowZoneSetupModal({
       const selectedThemeData = THEMES.find((t) => t.id === selectedTheme);
       onSave(zone, { theme: selectedThemeData?.name });
     } else {
-      // ✅ ratio는 "원금 투자 비율" (25/50/75)로 저장
       onSave(zone, { ratio: selectedRatio });
     }
   };
@@ -198,8 +149,8 @@ export function TomorrowZoneSetupModal({
                   {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
                 </button>
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에
-                  따라 이루어집니다.
+                  AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라
+                  이루어집니다.
                 </p>
               </div>
 
@@ -319,7 +270,7 @@ export function TomorrowZoneSetupModal({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="space-y-4">
-            {/* AI Recommendation Button */}
+            {/* ✅ 밸런스존만 문구 변경: "AI를 통한 테마 추천받기" */}
             <div>
               <button
                 onClick={handleAIRecommendation}
@@ -327,11 +278,11 @@ export function TomorrowZoneSetupModal({
                 className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
               >
                 <Sparkles className="w-5 h-5" />
-                {isLoadingAI ? "AI 분석 중..." : "AI를 통한 추천받기"}
+                {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
               </button>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에
-                따라 이루어집니다.
+                AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라
+                이루어집니다.
               </p>
             </div>
 
@@ -366,8 +317,11 @@ export function TomorrowZoneSetupModal({
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">투자 비율 선택</h3>
               <p className="text-sm text-gray-600 mb-4">
-                원금 투자 비율을 선택하세요 (이자 투자 100% 고정, 포인트 원금을
-                이자로 이동)
+                원금 투자 비율을 선택하세요
+                <br />
+                <span className="text-xs text-gray-500">
+                  이자 투자 100% 고정 · 포인트 이자로 자동 전환
+                </span>
               </p>
             </div>
 
@@ -389,11 +343,17 @@ export function TomorrowZoneSetupModal({
                         <p className="font-semibold text-gray-900">
                           {option.label}
                         </p>
-                        <p className="text-sm text-gray-600">
-                          {option.description}
+
+                        {/* ✅ 줄바꿈/깨짐 방지: headline + note를 2줄로 분리 */}
+                        <p className="text-sm text-gray-700 leading-snug">
+                          {option.headline}
+                        </p>
+                        <p className="text-xs text-gray-500 leading-snug">
+                          {option.note}
                         </p>
                       </div>
                     </div>
+
                     {selectedRatio === option.value && (
                       <div className="p-1 bg-purple-500 rounded-full">
                         <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
@@ -401,7 +361,6 @@ export function TomorrowZoneSetupModal({
                     )}
                   </div>
 
-                  {/* ✅ 표시를 "원금 투자" + "이자 투자(100% 고정)" 2줄로 변경 */}
                   <div className="space-y-2">
                     <div>
                       <div className="flex items-center justify-between mb-1">
