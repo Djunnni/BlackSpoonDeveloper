@@ -37,7 +37,7 @@ export function NotificationsPage() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">푸시 알림</p>
-                <p className="text-sm text-gray-600">모든 알림222 수신</p>
+                <p className="text-sm text-gray-600">모든 알림 수신</p>
               </div>
             </div>
             <button
@@ -45,7 +45,7 @@ export function NotificationsPage() {
               className={`relative w-12 h-6 rounded-full transition-colors ${
                 pushEnabled ? "bg-blue-600" : "bg-gray-300"
               }`}
-            >
+            >   <span className="text-red-500">TEST</span>
               <div
                 className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
                   pushEnabled ? "translate-x-6" : ""
