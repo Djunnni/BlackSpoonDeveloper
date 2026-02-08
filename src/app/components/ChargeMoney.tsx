@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowRight, Check, Wallet, Building2 } from "lucide-react";
-import { HistoryBackButton } from "./components/HistoryBackButton";
+import { HistoryBackButton } from "./components/HistoryBackButton.tsx";
 
 export function ChargeMoney() {
   const [step, setStep] = useState<"input" | "complete">("input");
