@@ -1,16 +1,30 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Layout } from '../Layout';
-import { Bell, Wallet, User, Shield, FileText, HelpCircle, MapPin, LogOut } from 'lucide-react';
-import { useAuthStore } from '../../../lib/stores/authStore';
-import { regionApi } from '../../../lib/api/services';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Layout } from "../Layout";
+import {
+  Bell,
+  Wallet,
+  User,
+  Shield,
+  FileText,
+  HelpCircle,
+  MapPin,
+  LogOut,
+} from "lucide-react";
+import { useAuthStore } from "../../../lib/stores/authStore";
+import { regionApi } from "../../../lib/api/services";
+import { NativeBridge } from "../../../lib/nativeBridge";
 
 export function SettingsPage() {
   const navigate = useNavigate();
   const { user, logout, updateUser } = useAuthStore();
   const [showRegionModal, setShowRegionModal] = useState(false);
-  const [regions, setRegions] = useState<Array<{ code: string; name: string }>>([]);
-  const [selectedRegionCode, setSelectedRegionCode] = useState<string>(user?.regionCode || '000000');
+  const [regions, setRegions] = useState<Array<{ code: string; name: string }>>(
+    [],
+  );
+  const [selectedRegionCode, setSelectedRegionCode] = useState<string>(
+    user?.regionCode || "000000",
+  );
 
   // 지역 목록 로드
   useEffect(() => {
@@ -19,26 +33,26 @@ export function SettingsPage() {
         const regionList = await regionApi.getRegions();
         setRegions(regionList);
       } catch (error) {
-        console.error('Failed to load regions:', error);
+        console.error("Failed to load regions:", error);
         // Mock 데이터 사용
         setRegions([
-          { code: '110000', name: '서울특별시' },
-          { code: '260000', name: '부산광역시' },
-          { code: '270000', name: '대구광역시' },
-          { code: '280000', name: '인천광역시' },
-          { code: '290000', name: '광주광역시' },
-          { code: '300000', name: '대전광역시' },
-          { code: '310000', name: '울산광역시' },
-          { code: '360000', name: '세종특별자치시' },
-          { code: '410000', name: '경기도' },
-          { code: '420000', name: '강원도' },
-          { code: '430000', name: '충청북도' },
-          { code: '440000', name: '충청남도' },
-          { code: '450000', name: '전라북도' },
-          { code: '460000', name: '전라남도' },
-          { code: '470000', name: '경상북도' },
-          { code: '480000', name: '경상남도' },
-          { code: '490000', name: '제주특별자치도' },
+          { code: "110000", name: "서울특별시" },
+          { code: "260000", name: "부산광역시" },
+          { code: "270000", name: "대구광역시" },
+          { code: "280000", name: "인천광역시" },
+          { code: "290000", name: "광주광역시" },
+          { code: "300000", name: "대전광역시" },
+          { code: "310000", name: "울산광역시" },
+          { code: "360000", name: "세종특별자치시" },
+          { code: "410000", name: "경기도" },
+          { code: "420000", name: "강원도" },
+          { code: "430000", name: "충청북도" },
+          { code: "440000", name: "충청남도" },
+          { code: "450000", name: "전라북도" },
+          { code: "460000", name: "전라남도" },
+          { code: "470000", name: "경상북도" },
+          { code: "480000", name: "경상남도" },
+          { code: "490000", name: "제주특별자치도" },
         ]);
       }
     };
@@ -51,7 +65,7 @@ export function SettingsPage() {
       updateUser(updatedUser);
       setShowRegionModal(false);
     } catch (error) {
-      console.error('Failed to update region:', error);
+      console.error("Failed to update region:", error);
       // Mock: 로컬에서 업데이트
       if (user) {
         updateUser({ ...user, regionCode: selectedRegionCode });
@@ -61,75 +75,101 @@ export function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    if (confirm('로그아웃 하시겠습니까?')) {
+    if (confirm("로그아웃 하시겠습니까?")) {
       await logout();
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     }
   };
 
-  const currentRegion = regions.find(r => r.code === user?.regionCode);
-  const hasRegion = user?.regionCode && user.regionCode !== '000000';
+  const currentRegion = regions.find((r) => r.code === user?.regionCode);
+  const hasRegion = user?.regionCode && user.regionCode !== "000000";
+
+  // ✅ 클릭 시 공통: 네이티브 하단 숨김 호출
+  const hideBottom = (msg: string) => {
+    NativeBridge.hideSettingBottom(msg);
+  };
 
   const menuItems = [
     {
-      id: 'region',
+      id: "region",
       icon: MapPin,
-      title: '지역 선택',
-      description: hasRegion ? currentRegion?.name || '지역을 선택해주세요' : '지역을 선택해주세요',
-      color: hasRegion ? 'blue' : 'orange',
-      onClick: () => setShowRegionModal(true),
+      title: "지역 선택",
+      description: hasRegion
+        ? currentRegion?.name || "지역을 선택해주세요"
+        : "지역을 선택해주세요",
+      color: hasRegion ? "blue" : "orange",
+      onClick: () => {
+        hideBottom("settings:region");
+        setShowRegionModal(true);
+      },
     },
     {
-      id: 'charge',
+      id: "charge",
       icon: Wallet,
-      title: '충전하기',
-      description: 'JB 머니 충전',
-      color: 'green',
-      onClick: () => navigate('/charge'),
+      title: "충전하기",
+      description: "JB 머니 충전",
+      color: "green",
+      onClick: () => {
+        hideBottom("settings:charge");
+        navigate("/charge");
+      },
     },
     {
-      id: 'notifications',
+      id: "notifications",
       icon: Bell,
-      title: '알림 설정',
-      description: '투자 알림 관리',
-      color: 'blue',
-      onClick: () => navigate('/notifications'),
+      title: "알림 설정",
+      description: "투자 알림 관리",
+      color: "blue",
+      onClick: () => {
+        hideBottom("settings:notifications");
+        navigate("/notifications");
+      },
     },
     {
-      id: 'account',
+      id: "account",
       icon: User,
-      title: '계정 관리',
-      description: user?.email || '개인정보 및 계정 설정',
-      color: 'purple',
-      onClick: () => {},
+      title: "계정 관리",
+      description: user?.email || "개인정보 및 계정 설정",
+      color: "purple",
+      onClick: () => {
+        hideBottom("settings:account");
+        // TODO: navigate("/account") 등 실제 화면 연결 시 추가
+      },
     },
     {
-      id: 'security',
+      id: "security",
       icon: Shield,
-      title: '보안 설정',
-      description: '비밀번호 및 인증',
-      color: 'red',
-      onClick: () => {},
+      title: "보안 설정",
+      description: "비밀번호 및 인증",
+      color: "red",
+      onClick: () => {
+        hideBottom("settings:security");
+        // TODO: navigate("/security") 등 실제 화면 연결 시 추가
+      },
     },
   ];
 
   const secondaryItems = [
     {
-      id: 'terms',
+      id: "terms",
       icon: FileText,
-      title: '이용약관',
-      onClick: () => {},
+      title: "이용약관",
+      onClick: () => {
+        hideBottom("settings:terms");
+      },
     },
     {
-      id: 'help',
+      id: "help",
       icon: HelpCircle,
-      title: '도움말',
-      onClick: () => {},
+      title: "도움말",
+      onClick: () => {
+        hideBottom("settings:help");
+      },
     },
     {
-      id: 'logout',
+      id: "logout",
       icon: LogOut,
-      title: '로그아웃',
+      title: "로그아웃",
       onClick: handleLogout,
     },
   ];
@@ -139,9 +179,7 @@ export function SettingsPage() {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">설정</h1>
         {user && (
-          <p className="text-sm text-gray-600 mb-6">
-            {user.name}님, 안녕하세요!
-          </p>
+          <p className="text-sm text-gray-600 mb-6">{user.name}님, 안녕하세요!</p>
         )}
 
         {/* Main Settings */}
@@ -149,11 +187,11 @@ export function SettingsPage() {
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             const colorClasses = {
-              green: 'bg-green-100 text-green-600',
-              blue: 'bg-blue-100 text-blue-600',
-              purple: 'bg-purple-100 text-purple-600',
-              red: 'bg-red-100 text-red-600',
-              orange: 'bg-orange-100 text-orange-600',
+              green: "bg-green-100 text-green-600",
+              blue: "bg-blue-100 text-blue-600",
+              purple: "bg-purple-100 text-purple-600",
+              red: "bg-red-100 text-red-600",
+              orange: "bg-orange-100 text-orange-600",
             };
 
             return (
@@ -161,10 +199,16 @@ export function SettingsPage() {
                 key={item.id}
                 onClick={item.onClick}
                 className={`w-full flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${
-                  index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
+                  index !== menuItems.length - 1
+                    ? "border-b border-gray-100"
+                    : ""
                 }`}
               >
-                <div className={`p-2.5 rounded-xl ${colorClasses[item.color as keyof typeof colorClasses]}`}>
+                <div
+                  className={`p-2.5 rounded-xl ${
+                    colorClasses[item.color as keyof typeof colorClasses]
+                  }`}
+                >
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 text-left">
@@ -186,11 +230,21 @@ export function SettingsPage() {
                 key={item.id}
                 onClick={item.onClick}
                 className={`w-full flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${
-                  index !== secondaryItems.length - 1 ? 'border-b border-gray-100' : ''
-                } ${item.id === 'logout' ? 'text-red-600' : ''}`}
+                  index !== secondaryItems.length - 1
+                    ? "border-b border-gray-100"
+                    : ""
+                } ${item.id === "logout" ? "text-red-600" : ""}`}
               >
-                <Icon className={`w-5 h-5 ${item.id === 'logout' ? 'text-red-600' : 'text-gray-600'}`} />
-                <p className={`flex-1 text-left font-medium ${item.id === 'logout' ? 'text-red-600' : 'text-gray-900'}`}>
+                <Icon
+                  className={`w-5 h-5 ${
+                    item.id === "logout" ? "text-red-600" : "text-gray-600"
+                  }`}
+                />
+                <p
+                  className={`flex-1 text-left font-medium ${
+                    item.id === "logout" ? "text-red-600" : "text-gray-900"
+                  }`}
+                >
                   {item.title}
                 </p>
               </button>
@@ -223,13 +277,17 @@ export function SettingsPage() {
                     onClick={() => setSelectedRegionCode(region.code)}
                     className={`w-full p-4 rounded-xl text-left transition-all ${
                       selectedRegionCode === region.code
-                        ? 'bg-blue-50 border-2 border-blue-600'
-                        : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
+                        ? "bg-blue-50 border-2 border-blue-600"
+                        : "bg-gray-50 border-2 border-transparent hover:bg-gray-100"
                     }`}
                   >
-                    <p className={`font-semibold ${
-                      selectedRegionCode === region.code ? 'text-blue-900' : 'text-gray-900'
-                    }`}>
+                    <p
+                      className={`font-semibold ${
+                        selectedRegionCode === region.code
+                          ? "text-blue-900"
+                          : "text-gray-900"
+                      }`}
+                    >
                       {region.name}
                     </p>
                   </button>
