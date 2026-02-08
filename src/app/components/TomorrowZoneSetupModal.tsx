@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { TrendingUp, Scale, Check, X, Sparkles } from "lucide-react";
+import {
+  TrendingUp,
+  Scale,
+  Check,
+  X,
+  Sparkles,
+} from "lucide-react";
 
 type Zone = "interest" | "extreme" | "balance";
 
@@ -46,8 +52,18 @@ const THEMES = [
     icon: "🤖",
     description: "인공지능 & 클라우드",
   },
-  { id: "finance", name: "금융", icon: "🏦", description: "은행, 증권, 보험" },
-  { id: "reits", name: "리츠", icon: "🏢", description: "부동산 투자신탁" },
+  {
+    id: "finance",
+    name: "금융",
+    icon: "🏦",
+    description: "은행, 증권, 보험",
+  },
+  {
+    id: "reits",
+    name: "리츠",
+    icon: "🏢",
+    description: "부동산 투자신탁",
+  },
   {
     id: "commodity",
     name: "원자재",
@@ -89,7 +105,7 @@ interface AIRecommendation {
 
 interface TomorrowZoneSetupModalProps {
   zone: "extreme" | "balance";
-  onSave: (zone: Zone) => void;
+  onSave: (zone: Zone, options?: { theme?: string; ratio?: number }) => void;
   onCancel: () => void;
 }
 
@@ -100,7 +116,8 @@ export function TomorrowZoneSetupModal({
 }: TomorrowZoneSetupModalProps) {
   const [selectedTheme, setSelectedTheme] = useState("us-tech");
   const [selectedRatio, setSelectedRatio] = useState(25);
-  const [showAIRecommendation, setShowAIRecommendation] = useState(false);
+  const [showAIRecommendation, setShowAIRecommendation] =
+    useState(false);
   const [aiRecommendation, setAiRecommendation] =
     useState<AIRecommendation | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
@@ -138,7 +155,12 @@ export function TomorrowZoneSetupModal({
   };
 
   const handleSave = () => {
-    onSave(zone);
+    if (zone === "extreme") {
+      const selectedThemeData = THEMES.find(t => t.id === selectedTheme);
+      onSave(zone, { theme: selectedThemeData?.name });
+    } else {
+      onSave(zone, { ratio: selectedRatio });
+    }
   };
 
   if (zone === "extreme") {
@@ -179,11 +201,13 @@ export function TomorrowZoneSetupModal({
                   className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
                 >
                   <Sparkles className="w-5 h-5" />
-                  {isLoadingAI ? "AI 분석 중..." : "AI를 통한 추천받기"}
+                  {isLoadingAI
+                    ? "AI 분석 중..."
+                    : "AI를 통한 추천받기"}
                 </button>
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에
-                  따라 이루어집니다.
+                  AI 추천은 참고용 보조 기능이며, 투자 결정은
+                  고객님의 판단에 따라 이루어집니다.
                 </p>
               </div>
 
@@ -192,7 +216,9 @@ export function TomorrowZoneSetupModal({
                 <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
                   <div className="flex items-center gap-2 mb-3">
                     <Sparkles className="w-5 h-5 text-purple-600" />
-                    <h4 className="font-semibold text-purple-900">AI 추천</h4>
+                    <h4 className="font-semibold text-purple-900">
+                      AI 추천
+                    </h4>
                   </div>
                   <div className="space-y-2">
                     <div className="p-3 bg-white/80 rounded-lg">
@@ -216,7 +242,9 @@ export function TomorrowZoneSetupModal({
               )}
 
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">테마 선택</h3>
+                <h3 className="font-semibold text-gray-900 mb-1">
+                  테마 선택
+                </h3>
                 <p className="text-sm text-gray-600 mb-4">
                   투자할 테마를 선택하세요
                 </p>
@@ -234,7 +262,9 @@ export function TomorrowZoneSetupModal({
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <span className="text-2xl sm:text-3xl">{theme.icon}</span>
+                      <span className="text-2xl sm:text-3xl">
+                        {theme.icon}
+                      </span>
                       {selectedTheme === theme.id && (
                         <div className="p-0.5 bg-orange-500 rounded-full">
                           <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
@@ -311,11 +341,13 @@ export function TomorrowZoneSetupModal({
                 className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all disabled:opacity-50"
               >
                 <Sparkles className="w-5 h-5" />
-                {isLoadingAI ? "AI 분석 중..." : "AI를 통한 추천받기"}
+                {isLoadingAI
+                  ? "AI 분석 중..."
+                  : "AI를 통한 추천받기"}
               </button>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라
-                이루어집니다.
+                AI 추천은 참고용 보조 기능이며, 투자 결정은
+                고객님의 판단에 따라 이루어집니다.
               </p>
             </div>
 
@@ -324,7 +356,9 @@ export function TomorrowZoneSetupModal({
               <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-5 h-5 text-purple-600" />
-                  <h4 className="font-semibold text-purple-900">AI 추천</h4>
+                  <h4 className="font-semibold text-purple-900">
+                    AI 추천
+                  </h4>
                 </div>
                 <div className="space-y-2">
                   <div className="p-3 bg-white/80 rounded-lg">

@@ -1,34 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
-import { Bell, Wallet } from "lucide-react";
+import { Bell, Wallet, AlertTriangle } from "lucide-react";
 import { ZoneCard } from "./ZoneCard";
 import { TomorrowZoneSelector } from "./TomorrowZoneSelector";
 import { TomorrowZoneSetupModal } from "./TomorrowZoneSetupModal";
+import { useAuthStore } from "../../lib/stores/authStore";
+import { useAccountStore } from "../../lib/stores/accountStore";
 
 type Zone = "interest" | "extreme" | "balance";
 
 export function MainApp() {
   const navigate = useNavigate();
-  const [todayZone, setTodayZone] = useState<Zone>("interest");
-  const [tomorrowZone, setTomorrowZone] = useState<Zone>("interest");
+  const { user } = useAuthStore();
+  const { account, fetchAccount, selectZone, isLoading } = useAccountStore();
+
   const [showTomorrowZoneSetup, setShowTomorrowZoneSetup] = useState(false);
   const [setupZoneType, setSetupZoneType] = useState<"extreme" | "balance">(
     "extreme",
   );
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null); // "000000" or null means not selected
   const [showRegionAlert, setShowRegionAlert] = useState(false);
 
-  const totalBalance = 15750000;
-  const totalProfit = 21500;
-  const totalReturn = 2.3;
+  // 컴포넌트 마운트 시 계좌 정보 로드
+  useEffect(() => {
+    fetchAccount();
+  }, [fetchAccount]);
+
+  // 지역이 선택되어 있는지 확인
+  const hasRegion = user?.regionCode && user.regionCode !== "000000";
 
   const handleTomorrowZoneClick = (zone: Zone) => {
     if (zone === "interest") {
-      setTomorrowZone("interest");
+      // 이자존은 바로 선택
+      selectZone({ zone: "interest" });
     } else if (zone === "extreme" || zone === "balance") {
-      // Check if region is selected
-      if (!selectedRegion || selectedRegion === "000000") {
+      // 지역 선택 확인
+      if (!hasRegion) {
         setShowRegionAlert(true);
         return;
       }
@@ -37,16 +44,44 @@ export function MainApp() {
     }
   };
 
-  const handleTomorrowZoneSave = (zone: Zone) => {
-    setTomorrowZone(zone);
-    setShowTomorrowZoneSetup(false);
+  const handleTomorrowZoneSave = async (
+    zone: Zone,
+    options?: { theme?: string; ratio?: number },
+  ) => {
+    try {
+      await selectZone({
+        zone,
+        theme: options?.theme,
+        ratio: options?.ratio,
+      });
+      setShowTomorrowZoneSetup(false);
+    } catch (error) {
+      console.error("Failed to select zone:", error);
+    }
   };
 
-  const getZoneLabel = (zone: Zone) => {
+  const getZoneLabel = (zone?: Zone) => {
     if (zone === "interest") return "이자존";
     if (zone === "extreme") return "익스트림존";
-    return "밸런스존";
+    if (zone === "balance") return "밸런스존";
+    return "이자존";
   };
+
+  // 로딩 중이면 로딩 UI 표시
+  if (isLoading && !account) {
+    return (
+      <Layout>
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">계좌 정보를 불러오는 중...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -54,7 +89,9 @@ export function MainApp() {
       {showTomorrowZoneSetup && (
         <TomorrowZoneSetupModal
           zone={setupZoneType}
-          onSave={handleTomorrowZoneSave}
+          onSave={(zone, options) =>
+            handleTomorrowZoneSave(zone as Zone, options)
+          }
           onCancel={() => setShowTomorrowZoneSetup(false)}
         />
       )}
@@ -66,24 +103,48 @@ export function MainApp() {
             <p className="text-sm text-blue-100">JB 머니</p>
           </div>
           <h1 className="text-3xl lg:text-4xl font-bold mb-6">
-            {totalBalance.toLocaleString()}원
+            {(account?.balance || 0).toLocaleString()}원
           </h1>
 
           <div className="grid grid-cols-3 gap-4">
             <div>
               <p className="text-xs text-blue-100 mb-1">오늘 발생 이자</p>
               <p className="text-lg font-semibold">
-                +{totalProfit.toLocaleString()}원
+                +{(account?.todayInterest || 0).toLocaleString()}원
               </p>
             </div>
             <div>
               <p className="text-xs text-blue-100 mb-1">일 수익률</p>
-              <p className="text-lg font-semibold text-green-300">
-                +{totalReturn}%
+              <p
+                className={`text-lg font-semibold ${(account?.dailyReturnRate || 0) >= 0 ? "text-green-300" : "text-red-300"}`}
+              >
+                {(account?.dailyReturnRate || 0) >= 0 ? "+" : ""}
+                {((account?.dailyReturnRate || 0) * 100).toFixed(2)}%
               </p>
             </div>
           </div>
         </div>
+
+        {/* 지역 미선택 알림 */}
+        {!hasRegion && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-yellow-900 mb-1">
+                지역 선택이 필요합니다
+              </p>
+              <p className="text-xs text-yellow-700 mb-2">
+                익스트림존과 밸런스존을 이용하시려면 지역을 먼저 선택해주세요.
+              </p>
+              <button
+                onClick={() => navigate("/settings")}
+                className="text-xs font-semibold text-yellow-800 hover:text-yellow-900 underline"
+              >
+                지역 선택하러 가기
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Grid Layout for Desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -95,7 +156,7 @@ export function MainApp() {
                 <h3 className="font-semibold text-gray-900">투자중인 존</h3>
               </div>
               <ZoneCard
-                zone={todayZone}
+                zone={account?.currentZone || "interest"}
                 isActive={true}
                 onClick={() => {}}
                 isToday={true}
@@ -104,14 +165,12 @@ export function MainApp() {
 
             {/* Tomorrow Zone Selection */}
             <TomorrowZoneSelector
-              tomorrowZone={tomorrowZone}
+              tomorrowZone={account?.nextZone || "interest"}
               onZoneClick={handleTomorrowZoneClick}
               showRegionAlert={() => {
                 setShowRegionAlert(true);
               }}
-              hasRegionSelected={
-                selectedRegion !== null && selectedRegion !== "000000"
-              }
+              hasRegionSelected={hasRegion || false}
             />
           </div>
 
@@ -148,33 +207,37 @@ export function MainApp() {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Account Info */}
             <div className="bg-white rounded-2xl p-5 border border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-4">최근 활동</h3>
+              <h3 className="font-semibold text-gray-900 mb-4">계좌 정보</h3>
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">이자 발생</p>
-                    <p className="text-xs text-gray-600">+21,500원</p>
-                  </div>
-                  <p className="text-xs text-gray-500">오늘</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-600">내일 투자할 존</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {getZoneLabel(account?.nextZone)}
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">존 변경</p>
-                    <p className="text-xs text-gray-600">이자존 → 익스트림존</p>
+                {account?.nextZone === "extreme" && account?.extremeTheme && (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-600">선택한 테마</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {account.extremeTheme}
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-500">어제</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">투자 수익</p>
-                    <p className="text-xs text-gray-600">+48,200원</p>
-                  </div>
-                  <p className="text-xs text-gray-500">2일 전</p>
+                )}
+                {account?.nextZone === "balance" &&
+                  account?.balanceRatio !== undefined && (
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-gray-600">투자 비율</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {account.balanceRatio}%
+                      </p>
+                    </div>
+                  )}
+                <div className="pt-3 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 text-center">
+                    내일 00:00에 자동으로 전환됩니다
+                  </p>
                 </div>
               </div>
             </div>
@@ -188,19 +251,7 @@ export function MainApp() {
           <div className="bg-white rounded-2xl w-full max-w-sm p-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-8 h-8 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+                <AlertTriangle className="w-8 h-8 text-red-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 지역 선택이 필요합니다
@@ -214,9 +265,7 @@ export function MainApp() {
                 <button
                   onClick={() => {
                     setShowRegionAlert(false);
-                    // TODO: Navigate to region selection or open region modal
-                    // For demo, let's set a mock region
-                    setSelectedRegion("110000");
+                    navigate("/settings");
                   }}
                   className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
                 >

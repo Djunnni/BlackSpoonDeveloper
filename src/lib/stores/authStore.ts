@@ -1,7 +1,19 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { User } from '../api/types';
-import { authApi } from '../api/services';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { User } from "../api/types";
+import { authApi } from "../api/services";
+
+// Mock 사용자 데이터
+const mockUser: User = {
+  id: "user-1",
+  name: "홍길동",
+  email: "user@example.com",
+  phoneNumber: "010-1234-5678",
+  regionCode: "000000",
+  createdAt: "2026-01-01T00:00:00Z",
+};
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === "true";
 
 interface AuthState {
   // 상태
@@ -22,10 +34,10 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      // 초기 상태
-      user: null,
-      token: null,
-      isAuthenticated: false,
+      // 초기 상태 - Mock 모드일 때는 자동 로그인
+      user: USE_MOCK ? mockUser : null,
+      token: USE_MOCK ? "mock-token-12345" : null,
+      isAuthenticated: USE_MOCK ? true : false,
       isLoading: false,
       error: null,
 
@@ -34,10 +46,10 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.login({ email, password });
-          
+
           // 토큰 저장
-          localStorage.setItem('auth_token', response.token);
-          
+          localStorage.setItem("auth_token", response.token);
+
           set({
             user: response.user,
             token: response.token,
@@ -46,7 +58,7 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error: any) {
           set({
-            error: error.response?.data?.message || '로그인에 실패했습니다.',
+            error: error.response?.data?.message || "로그인에 실패했습니다.",
             isLoading: false,
           });
           throw error;
@@ -58,10 +70,10 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authApi.logout();
         } catch (error) {
-          console.error('Logout API error:', error);
+          console.error("Logout API error:", error);
         } finally {
           // 로컬 상태 및 저장소 초기화
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem("auth_token");
           set({
             user: null,
             token: null,
@@ -73,8 +85,19 @@ export const useAuthStore = create<AuthState>()(
 
       // 인증 확인 (앱 시작 시 또는 페이지 로드 시)
       checkAuth: async () => {
-        const token = localStorage.getItem('auth_token');
-        
+        // Mock 모드일 때는 자동으로 인증된 상태로 설정
+        if (USE_MOCK) {
+          set({
+            user: mockUser,
+            token: "mock-token-12345",
+            isAuthenticated: true,
+            isLoading: false,
+          });
+          return;
+        }
+
+        const token = localStorage.getItem("auth_token");
+
         if (!token) {
           set({ isAuthenticated: false, user: null, token: null });
           return;
@@ -91,7 +114,7 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error) {
           // 인증 실패 시 토큰 제거
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem("auth_token");
           set({
             user: null,
             token: null,
@@ -112,9 +135,9 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
       // 토큰은 localStorage에 별도로 저장하므로 여기서는 user만 persist
       partialize: (state) => ({ user: state.user }),
-    }
-  )
+    },
+  ),
 );

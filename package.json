@@ -1,11 +1,11 @@
 {
-  "name": "BlackSpoonDev",
+  "name": "@figma/my-make-file",
   "private": true,
   "version": "0.0.1",
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite dev"
+    "dev": "vite"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

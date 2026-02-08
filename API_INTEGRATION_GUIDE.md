@@ -42,13 +42,13 @@ VITE_USE_MOCK_API=false  # true면 mock API 사용
 #### 인증 스토어 (authStore)
 
 ```tsx
-import { useAuthStore } from "@/lib/stores/authStore";
+import { useAuthStore } from '@/lib/stores/authStore';
 
 function MyComponent() {
   const { user, isAuthenticated, login, logout } = useAuthStore();
 
   const handleLogin = async () => {
-    await login("user@example.com", "password123");
+    await login('user@example.com', 'password123');
   };
 
   return (
@@ -66,8 +66,8 @@ function MyComponent() {
 #### 계좌 스토어 (accountStore)
 
 ```tsx
-import { useAccountStore } from "@/lib/stores/accountStore";
-import { useEffect } from "react";
+import { useAccountStore } from '@/lib/stores/accountStore';
+import { useEffect } from 'react';
 
 function AccountInfo() {
   const { account, fetchAccount, selectZone } = useAccountStore();
@@ -78,8 +78,8 @@ function AccountInfo() {
 
   const handleSelectZone = async () => {
     await selectZone({
-      zone: "extreme",
-      theme: "미국 테크",
+      zone: 'extreme',
+      theme: '미국 테크',
     });
   };
 
@@ -96,12 +96,11 @@ function AccountInfo() {
 #### 투자 분석 스토어 (investmentStore)
 
 ```tsx
-import { useInvestmentStore } from "@/lib/stores/investmentStore";
-import { useEffect } from "react";
+import { useInvestmentStore } from '@/lib/stores/investmentStore';
+import { useEffect } from 'react';
 
 function InvestmentReport() {
-  const { records, ranking, fetchInvestmentRecords, fetchRegionalRanking } =
-    useInvestmentStore();
+  const { records, ranking, fetchInvestmentRecords, fetchRegionalRanking } = useInvestmentStore();
 
   useEffect(() => {
     fetchInvestmentRecords();
@@ -113,9 +112,7 @@ function InvestmentReport() {
       <p>지역 순위: {ranking?.myRank}위</p>
       {records.map((record) => (
         <div key={record.id}>
-          <p>
-            {record.date} - 수익: {record.profit.toLocaleString()}원
-          </p>
+          <p>{record.date} - 수익: {record.profit.toLocaleString()}원</p>
         </div>
       ))}
     </div>
@@ -126,10 +123,10 @@ function InvestmentReport() {
 ### 3. 인증 보호 라우트 사용
 
 ```tsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProtectedRoute } from "@/app/components/ProtectedRoute";
-import { LoginPage } from "@/app/components/pages/LoginPage";
-import { HomePage } from "@/app/components/pages/HomePage";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ProtectedRoute } from '@/app/components/ProtectedRoute';
+import { LoginPage } from '@/app/components/pages/LoginPage';
+import { HomePage } from '@/app/components/pages/HomePage';
 
 function App() {
   return (
@@ -155,7 +152,7 @@ function App() {
 #### useAuth - 인증 상태 확인
 
 ```tsx
-import { useAuth } from "@/lib/hooks/useAuth";
+import { useAuth } from '@/lib/hooks/useAuth';
 
 function MyComponent() {
   const { user, isAuthenticated, hasRegion } = useAuth();
@@ -171,7 +168,7 @@ function MyComponent() {
 #### useRequireAuth - 인증 필수 페이지
 
 ```tsx
-import { useRequireAuth } from "@/lib/hooks/useRequireAuth";
+import { useRequireAuth } from '@/lib/hooks/useRequireAuth';
 
 function ProtectedPage() {
   const { isAuthenticated, isLoading } = useRequireAuth();
@@ -212,7 +209,6 @@ function ProtectedPage() {
 ### 로그인
 
 **요청:**
-
 ```json
 POST /auth/login
 {
@@ -222,7 +218,6 @@ POST /auth/login
 ```
 
 **응답:**
-
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -238,14 +233,12 @@ POST /auth/login
 ### 계좌 정보 조회
 
 **요청:**
-
 ```
 GET /account
 Authorization: Bearer {token}
 ```
 
 **응답:**
-
 ```json
 {
   "accountId": "account-123",
@@ -261,7 +254,6 @@ Authorization: Bearer {token}
 ### 존 선택
 
 **요청:**
-
 ```json
 POST /account/select-zone
 Authorization: Bearer {token}
@@ -276,14 +268,12 @@ Authorization: Bearer {token}
 ### 투자 내역 조회
 
 **요청:**
-
 ```
 GET /investments
 Authorization: Bearer {token}
 ```
 
 **응답:**
-
 ```json
 [
   {
@@ -305,15 +295,13 @@ Authorization: Bearer {token}
 ### 토큰 저장
 
 로그인 성공 시 JWT 토큰이 자동으로 `localStorage`에 저장됩니다:
-
 ```typescript
-localStorage.setItem("auth_token", token);
+localStorage.setItem('auth_token', token);
 ```
 
 ### 요청 인터셉터
 
 모든 API 요청에 자동으로 토큰이 추가됩니다:
-
 ```typescript
 config.headers.Authorization = `Bearer ${token}`;
 ```
@@ -321,11 +309,10 @@ config.headers.Authorization = `Bearer ${token}`;
 ### 응답 인터셉터
 
 401 에러 발생 시 자동으로 로그아웃 처리됩니다:
-
 ```typescript
 if (error.response?.status === 401) {
-  localStorage.removeItem("auth_token");
-  window.location.href = "/login";
+  localStorage.removeItem('auth_token');
+  window.location.href = '/login';
 }
 ```
 
@@ -340,22 +327,22 @@ if (error.response?.status === 401) {
 // services.ts 예시
 export const authApi = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    if (import.meta.env.VITE_USE_MOCK_API === "true") {
+    if (import.meta.env.VITE_USE_MOCK_API === 'true') {
       // Mock 데이터 반환
       return {
-        token: "mock-token-12345",
+        token: 'mock-token-12345',
         user: {
-          id: "user-1",
-          name: "홍길동",
+          id: 'user-1',
+          name: '홍길동',
           email: data.email,
-          regionCode: "110000",
+          regionCode: '110000',
           createdAt: new Date().toISOString(),
         },
       };
     }
-
+    
     // 실제 API 호출
-    const response = await apiClient.post<LoginResponse>("/auth/login", data);
+    const response = await apiClient.post<LoginResponse>('/auth/login', data);
     return response.data;
   },
 };
@@ -366,7 +353,6 @@ export const authApi = {
 자세한 타입 정의는 `/src/lib/api/types.ts` 파일을 참고하세요.
 
 주요 타입:
-
 - `User` - 사용자 정보
 - `Account` - 계좌 정보
 - `InvestmentRecord` - 투자 내역

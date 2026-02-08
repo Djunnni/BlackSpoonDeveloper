@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Map, Settings } from "lucide-react";
+import { Home, BarChart3, Settings } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,7 +12,6 @@ export function Layout({ children }: LayoutProps) {
 
   const getCurrentTab = () => {
     if (location.pathname === "/") return "home";
-    if (location.pathname === "/map") return "map";
     if (location.pathname === "/analysis") return "analysis";
     if (location.pathname === "/settings") return "settings";
     return "home";

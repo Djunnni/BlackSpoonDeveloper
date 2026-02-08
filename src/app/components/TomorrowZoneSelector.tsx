@@ -113,7 +113,6 @@ export function TomorrowZoneSelector({
             </div>
           </div>
         </button>
-
         <button
           onClick={() => {
             if (!hasRegionSelected) {
