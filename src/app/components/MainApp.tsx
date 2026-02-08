@@ -266,7 +266,10 @@ export function MainApp() {
         </div>
 
         {/* ✅ 2) 아래만 스크롤되는 영역 */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        + <div
+            className="flex-1 min-h-0 overflow-y-auto"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+          >
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
