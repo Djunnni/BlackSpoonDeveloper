@@ -45,7 +45,7 @@ export function NotificationsPage() {
               className={`relative w-12 h-6 rounded-full transition-colors ${
                 pushEnabled ? "bg-blue-600" : "bg-gray-300"
               }`}
-            >   <span className="text-red-500">TEST</span>
+            >
               <div
                 className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
                   pushEnabled ? "translate-x-6" : ""
