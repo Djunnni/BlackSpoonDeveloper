@@ -182,8 +182,7 @@ export function MainApp() {
       )}
 
       {/* ✅ JB 머니(헤더) 고정 + 아래만 스크롤 */}
-      {/* ✅ NOTE: Layout이 이미 높이를 잡고 있을 수 있어서 h-full 로 두는게 더 안전 */}
-      <div className="h-full overflow-hidden flex flex-col">
+      <div className="h-[100dvh] overflow-hidden flex flex-col">
         {/* ✅ 1) 고정 헤더 영역 */}
         <div className="shrink-0 bg-white">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
@@ -266,23 +265,27 @@ export function MainApp() {
           <div className="h-px bg-gray-100" />
         </div>
 
-        {/* ✅ 2) 아래만 스크롤되는 영역 */}
-        {/* ✅ 스크롤바(영역) 숨김 + iOS safe-area 만큼 바닥 여백 확보 */}
+        {/* ✅ 2) 아래만 스크롤되는 영역 (스크롤 유지 + 스크롤바만 숨김 + 하단 여백 증가) */}
         <div
-          className="flex-1 min-h-0 overflow-y-auto"
+          className="flex-1 min-h-0 overflow-y-auto bs-scroll"
           style={{
             WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none", // Firefox
-            msOverflowStyle: "none", // IE/Edge(old)
+            scrollbarWidth: "none", // Firefox 스크롤바 숨김
+            msOverflowStyle: "none", // IE/Old Edge 스크롤바 숨김
           }}
         >
-          {/* WebKit 스크롤바 숨김(인라인 스타일만으로는 안되어서 내부 <style> 사용) */}
+          {/* WebKit(iOS/사파리/크롬) 스크롤바 숨김 */}
           <style>{`
-            .bs-scroll-hidden::-webkit-scrollbar { display: none; width: 0; height: 0; }
+            .bs-scroll::-webkit-scrollbar {
+              width: 0 !important;
+              height: 0 !important;
+              display: none !important;
+            }
           `}</style>
 
+          {/* ✅ 여기(안쪽 컨텐츠)에 bottom padding을 크게 줘야 탭바/세이프에어리어 위까지 더 올라옴 */}
           <div
-            className="bs-scroll-hidden max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+            className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
             style={{
               paddingBottom: "calc(env(safe-area-inset-bottom) + 120px)",
             }}
@@ -382,8 +385,7 @@ export function MainApp() {
                   </div>
                 </div>
 
-                {/* ✅ 아래 내용이 더 있어도 탭바에 안가리고 끝까지 스크롤되게 */}
-                {/* 필요한 섹션을 여기에 계속 추가하면 됨 */}
+                {/* 아래에 더 내용 있어도 안전하게 스크롤 됨 */}
               </div>
             </div>
           </div>
