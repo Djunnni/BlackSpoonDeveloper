@@ -9,10 +9,18 @@ export function HistoryBackButton() {
   return (
     <button
       onClick={handleBack}
-      className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+      aria-label="뒤로가기"
+      className="
+        flex items-center justify-center
+        w-10 h-10
+        rounded-full
+        text-gray-900
+        hover:bg-gray-100
+        active:bg-gray-200
+        transition-colors
+      "
     >
-      <ArrowLeft className="w-4 h-4" />
-      <span>뒤로가기</span>
+      <ArrowLeft className="w-6 h-6 stroke-[2.5]" />
     </button>
   );
 }
