@@ -266,7 +266,7 @@ export function MainApp() {
         </div>
 
         {/* ✅ 2) 아래만 스크롤되는 영역 */}
-        + <div
+         <div
             className="flex-1 min-h-0 overflow-y-auto"
             style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
           >
