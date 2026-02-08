@@ -56,43 +56,114 @@ interface TomorrowZoneSetupModalProps {
   onCancel: () => void;
 }
 
-export function TomorrowZoneSetupModal({
-  zone,
-  onSave,
-  onCancel,
-}: TomorrowZoneSetupModalProps) {
+function pickRandomThemeId(): string {
+  const idx = Math.floor(Math.random() * THEMES.length);
+  return THEMES[idx]?.id ?? "us-tech";
+}
+
+function buildThemeRecommendation(themeId: string): Pick<AIRecommendation, "reason" | "marketAnalysis"> {
+  const map: Record<string, { reason: string; marketAnalysis: string }> = {
+    "us-tech": {
+      reason: "미국 테크는 대형 우량주 중심으로 시장 충격에 비교적 강하고, 장기 성장 스토리가 뚜렷합니다.",
+      marketAnalysis:
+        "AI·클라우드 투자와 소프트웨어 구독 매출 비중이 높아 실적 안정성이 상대적으로 좋습니다. 다만 금리/규제 이슈로 단기 변동성이 생길 수 있어 분할 접근이 유리합니다.",
+    },
+    "china-ev": {
+      reason: "중국 전기차는 정책·보급 확대의 영향이 크고, 가격 경쟁력을 바탕으로 점유율 변화가 빠릅니다.",
+      marketAnalysis:
+        "보조금/규제/수출 환경 변화에 민감해 변동성이 클 수 있습니다. 다만 원가 절감과 신모델 주기에서 모멘텀이 발생하면 단기간 탄력이 커질 수 있습니다.",
+    },
+    semiconductor: {
+      reason: "반도체는 경기 순환을 타지만, AI·데이터센터 수요로 고부가 영역 성장성이 큽니다.",
+      marketAnalysis:
+        "메모리 사이클과 공급 조절, HBM·AI 가속기 수요가 핵심 변수입니다. 업황 전환 구간에서는 급등락이 가능하므로 리스크 관리가 중요합니다.",
+    },
+    bio: {
+      reason: "바이오/제약은 신약 모멘텀과 실적 방어력이 공존해 분산 투자 관점에서 매력적입니다.",
+      marketAnalysis:
+        "임상 결과·규제 승인 등 이벤트 드리븐 변동성이 존재합니다. 대형 제약/헬스케어 중심으로 접근하면 리스크를 일부 완화할 수 있습니다.",
+    },
+    energy: {
+      reason: "에너지는 인플레이션·지정학 리스크 구간에서 방어적 성격이 나타나기 쉽습니다.",
+      marketAnalysis:
+        "원유/가스 가격과 OPEC 정책, 수요 둔화가 주요 변수입니다. 신재생 비중이 커질수록 정책·금리 환경도 함께 확인하는 것이 좋습니다.",
+    },
+    battery: {
+      reason: "2차전지는 전기차/ESS 확산의 수혜를 받으며, 소재·공정 혁신에 따라 밸류체인이 함께 움직입니다.",
+      marketAnalysis:
+        "메탈 가격(리튬/니켈)과 수요 둔화, 고객사 증설 속도에 따라 변동성이 큽니다. 구조적으로는 장기 성장 테마로 평가받습니다.",
+    },
+    ai: {
+      reason: "AI/클라우드는 생산성 혁신의 중심에 있어 성장 기대가 크고, 시장 관심이 집중되는 구간입니다.",
+      marketAnalysis:
+        "모멘텀은 강하지만 밸류에이션 부담과 단기 과열이 동시에 나타날 수 있습니다. 뉴스/실적에 민감하므로 비중 조절과 손익 관리가 중요합니다.",
+    },
+    finance: {
+      reason: "금융은 금리 환경과 경기 흐름에 따라 실적 가시성이 비교적 높은 편입니다.",
+      marketAnalysis:
+        "금리 인하/인상 국면, 대손 비용, 규제 변화가 핵심입니다. 배당/자사주 등 주주환원 정책이 강화되면 방어력에 도움이 됩니다.",
+    },
+    reits: {
+      reason: "리츠는 배당 기반의 현금흐름을 기대할 수 있어 안정적인 투자 성향에 적합합니다.",
+      marketAnalysis:
+        "금리와 공실률, 임대료 지표가 중요합니다. 금리 부담이 완화되면 평가가 개선될 수 있으나, 섹터별(오피스/물류/리테일) 차이가 큽니다.",
+    },
+    commodity: {
+      reason: "원자재는 인플레이션·공급망 이슈에 대한 헤지 수단으로 활용되기도 합니다.",
+      marketAnalysis:
+        "달러 강세/약세, 공급 쇼크, 수요 사이클에 따라 변동성이 큽니다. 단기 트레이딩 성격이 강할 수 있어 포지션 관리가 필요합니다.",
+    },
+  };
+
+  return (
+    map[themeId] ?? {
+      reason: "선택된 테마는 현재 시장 흐름에서 주목도가 높아 포트폴리오 분산에 도움이 될 수 있습니다.",
+      marketAnalysis:
+        "단기 변동성은 존재할 수 있으나, 주요 지표(실적/정책/수요)를 함께 점검하면 리스크를 줄일 수 있습니다.",
+    }
+  );
+}
+
+export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneSetupModalProps) {
   const [selectedTheme, setSelectedTheme] = useState("us-tech");
-  const [selectedRatio, setSelectedRatio] = useState(25);
+  const [selectedRatio, setSelectedRatio] = useState(25); // ✅ 기본: 안정형 선택
   const [showAIRecommendation, setShowAIRecommendation] = useState(false);
-  const [aiRecommendation, setAiRecommendation] =
-    useState<AIRecommendation | null>(null);
+  const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   const handleAIRecommendation = async () => {
     setIsLoadingAI(true);
 
     // Simulate AI processing
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     if (zone === "extreme") {
+      const themeId = "ai";
+      const copy = buildThemeRecommendation(themeId);
+
       const mockRecommendation: AIRecommendation = {
-        themeId: "ai",
-        reason:
-          "AI/클라우드 섹터는 현재 강한 상승 모멘텀을 보이고 있으며, 주요 기업들의 실적이 시장 기대치를 상회하고 있습니다.",
-        marketAnalysis:
-          "최근 생성형 AI 기술의 발전으로 관련 기업들의 매출이 급증하고 있으며, 향후 3개월간 지속적인 성장이 예상됩니다. 다만 고위험 상품이므로 변동성에 주의가 필요합니다.",
+        themeId,
+        reason: copy.reason,
+        marketAnalysis: copy.marketAnalysis,
       };
+
       setAiRecommendation(mockRecommendation);
-      setSelectedTheme(mockRecommendation.themeId!);
+      setSelectedTheme(themeId);
     } else {
+      // ✅ 밸런스존: "안정형"을 기본으로 선택 상태로 맞춰주고,
+      // ✅ THEMES 중 랜덤 1개를 뽑아 AI 추천 카드에 보여줌
+      setSelectedRatio(25);
+
+      const themeId = pickRandomThemeId();
+      const copy = buildThemeRecommendation(themeId);
+
       const mockRecommendation: AIRecommendation = {
-        ratioValue: 50,
-        reason: "현재 시장 변동성이 중간 수준이므로, 균형형 투자 비율이 적합합니다.",
-        marketAnalysis:
-          "최근 시장 지표를 분석한 결과, 안정성과 수익성의 균형을 맞춘 50:50 비율이 가장 효율적인 위험-수익 구조를 제공할 것으로 예상됩니다.",
+        themeId,
+        reason: copy.reason,
+        marketAnalysis: copy.marketAnalysis,
       };
+
       setAiRecommendation(mockRecommendation);
-      setSelectedRatio(mockRecommendation.ratioValue!);
     }
 
     setShowAIRecommendation(true);
@@ -108,6 +179,10 @@ export function TomorrowZoneSetupModal({
     }
   };
 
+  const recommendedTheme = aiRecommendation?.themeId
+    ? THEMES.find((t) => t.id === aiRecommendation.themeId)
+    : null;
+
   if (zone === "extreme") {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -119,18 +194,11 @@ export function TomorrowZoneSetupModal({
                 <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                  익스트림존 설정
-                </h2>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  이자만으로 투자 · 고위험 고수익
-                </p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">익스트림존 설정</h2>
+                <p className="text-xs sm:text-sm text-gray-600">이자만으로 투자 · 고위험 고수익</p>
               </div>
             </div>
-            <button
-              onClick={onCancel}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
+            <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
             </button>
           </div>
@@ -149,34 +217,49 @@ export function TomorrowZoneSetupModal({
                   {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
                 </button>
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라
-                  이루어집니다.
+                  AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라 이루어집니다.
                 </p>
               </div>
 
               {/* AI Recommendation Result */}
               {showAIRecommendation && aiRecommendation && (
                 <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
-                    <h4 className="font-semibold text-purple-900">AI 추천</h4>
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-purple-600" />
+                      <h4 className="font-semibold text-purple-900">AI 추천</h4>
+                    </div>
+
+                    {recommendedTheme && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-white/80 border border-purple-200 rounded-full">
+                        <span className="text-base">{recommendedTheme.icon}</span>
+                        <span className="text-xs sm:text-sm font-medium text-gray-900">
+                          {recommendedTheme.name}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <div className="space-y-2">
-                    <div className="p-3 bg-white/80 rounded-lg">
-                      <p className="text-sm font-medium text-gray-900 mb-1">
-                        추천 이유
+
+                  {recommendedTheme && (
+                    <div className="mb-3 p-3 bg-white/80 rounded-lg border border-purple-100">
+                      <p className="text-xs text-gray-500 mb-1">추천 테마</p>
+                      <p className="text-sm font-semibold text-gray-900 leading-snug">
+                        {recommendedTheme.name}
                       </p>
-                      <p className="text-sm text-gray-700">
-                        {aiRecommendation.reason}
+                      <p className="text-xs text-gray-600 leading-snug mt-1">
+                        {recommendedTheme.description}
                       </p>
                     </div>
+                  )}
+
+                  <div className="space-y-2">
                     <div className="p-3 bg-white/80 rounded-lg">
-                      <p className="text-sm font-medium text-gray-900 mb-1">
-                        시장 분석
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        {aiRecommendation.marketAnalysis}
-                      </p>
+                      <p className="text-sm font-medium text-gray-900 mb-1">추천 이유</p>
+                      <p className="text-sm text-gray-700">{aiRecommendation.reason}</p>
+                    </div>
+                    <div className="p-3 bg-white/80 rounded-lg">
+                      <p className="text-sm font-medium text-gray-900 mb-1">시장 분석</p>
+                      <p className="text-sm text-gray-700">{aiRecommendation.marketAnalysis}</p>
                     </div>
                   </div>
                 </div>
@@ -184,9 +267,7 @@ export function TomorrowZoneSetupModal({
 
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1">테마 선택</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  투자할 테마를 선택하세요
-                </p>
+                <p className="text-sm text-gray-600 mb-4">투자할 테마를 선택하세요</p>
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
@@ -208,12 +289,8 @@ export function TomorrowZoneSetupModal({
                         </div>
                       )}
                     </div>
-                    <h4 className="font-semibold text-gray-900 text-sm mb-1">
-                      {theme.name}
-                    </h4>
-                    <p className="text-xs text-gray-600 leading-tight">
-                      {theme.description}
-                    </p>
+                    <h4 className="font-semibold text-gray-900 text-sm mb-1">{theme.name}</h4>
+                    <p className="text-xs text-gray-600 leading-tight">{theme.description}</p>
                   </button>
                 ))}
               </div>
@@ -251,18 +328,11 @@ export function TomorrowZoneSetupModal({
               <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">
-                밸런스존 설정
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600">
-                원금 일부 투자 · 중위험 중수익
-              </p>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900">밸런스존 설정</h2>
+              <p className="text-xs sm:text-sm text-gray-600">원금 일부 투자 · 중위험 중수익</p>
             </div>
           </div>
-          <button
-            onClick={onCancel}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
           </button>
         </div>
@@ -270,7 +340,7 @@ export function TomorrowZoneSetupModal({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="space-y-4">
-            {/* ✅ 밸런스존만 문구 변경: "AI를 통한 테마 추천받기" */}
+            {/* ✅ 밸런스존 AI 버튼: 테마 랜덤 추천 + 안정형(25) 자동 선택 */}
             <div>
               <button
                 onClick={handleAIRecommendation}
@@ -281,34 +351,49 @@ export function TomorrowZoneSetupModal({
                 {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
               </button>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라
-                이루어집니다.
+                AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라 이루어집니다.
               </p>
             </div>
 
-            {/* AI Recommendation Result */}
+            {/* ✅ AI Recommendation Result (밸런스존: 추천 테마를 옆(상단 우측)으로 예쁘게 보여줌) */}
             {showAIRecommendation && aiRecommendation && (
               <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
-                  <h4 className="font-semibold text-purple-900">AI 추천</h4>
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    <h4 className="font-semibold text-purple-900">AI 추천</h4>
+                  </div>
+
+                  {recommendedTheme && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/80 border border-purple-200 rounded-full">
+                      <span className="text-base">{recommendedTheme.icon}</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-900">
+                        {recommendedTheme.name}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="space-y-2">
-                  <div className="p-3 bg-white/80 rounded-lg">
-                    <p className="text-sm font-medium text-gray-900 mb-1">
-                      추천 이유
+
+                {recommendedTheme && (
+                  <div className="mb-3 p-3 bg-white/80 rounded-lg border border-purple-100">
+                    <p className="text-xs text-gray-500 mb-1">추천 테마</p>
+                    <p className="text-sm font-semibold text-gray-900 leading-snug">
+                      {recommendedTheme.name}
                     </p>
-                    <p className="text-sm text-gray-700">
-                      {aiRecommendation.reason}
+                    <p className="text-xs text-gray-600 leading-snug mt-1">
+                      {recommendedTheme.description}
                     </p>
                   </div>
+                )}
+
+                <div className="space-y-2">
                   <div className="p-3 bg-white/80 rounded-lg">
-                    <p className="text-sm font-medium text-gray-900 mb-1">
-                      시장 분석
-                    </p>
-                    <p className="text-sm text-gray-700">
-                      {aiRecommendation.marketAnalysis}
-                    </p>
+                    <p className="text-sm font-medium text-gray-900 mb-1">추천 이유</p>
+                    <p className="text-sm text-gray-700">{aiRecommendation.reason}</p>
+                  </div>
+                  <div className="p-3 bg-white/80 rounded-lg">
+                    <p className="text-sm font-medium text-gray-900 mb-1">시장 분석</p>
+                    <p className="text-sm text-gray-700">{aiRecommendation.marketAnalysis}</p>
                   </div>
                 </div>
               </div>
@@ -319,9 +404,7 @@ export function TomorrowZoneSetupModal({
               <p className="text-sm text-gray-600 mb-4">
                 원금 투자 비율을 선택하세요
                 <br />
-                <span className="text-xs text-gray-500">
-                  이자 투자 100% 고정 · 포인트 이자로 자동 전환
-                </span>
+                <span className="text-xs text-gray-500">이자 투자 100% 고정 · 포인트 이자로 자동 전환</span>
               </p>
             </div>
 
@@ -340,17 +423,9 @@ export function TomorrowZoneSetupModal({
                     <div className="flex items-center gap-3">
                       <Scale className="w-5 h-5 text-purple-600" />
                       <div className="text-left">
-                        <p className="font-semibold text-gray-900">
-                          {option.label}
-                        </p>
-
-                        {/* ✅ 줄바꿈/깨짐 방지: headline + note를 2줄로 분리 */}
-                        <p className="text-sm text-gray-700 leading-snug">
-                          {option.headline}
-                        </p>
-                        <p className="text-xs text-gray-500 leading-snug">
-                          {option.note}
-                        </p>
+                        <p className="font-semibold text-gray-900">{option.label}</p>
+                        <p className="text-sm text-gray-700 leading-snug">{option.headline}</p>
+                        <p className="text-xs text-gray-500 leading-snug">{option.note}</p>
                       </div>
                     </div>
 
@@ -364,9 +439,7 @@ export function TomorrowZoneSetupModal({
                   <div className="space-y-2">
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          원금 투자
-                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600">원금 투자</p>
                         <p className="text-xs sm:text-sm font-medium text-gray-900">
                           {option.principal}%
                         </p>
@@ -381,9 +454,7 @@ export function TomorrowZoneSetupModal({
 
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs sm:text-sm text-gray-600">
-                          이자 투자 (고정)
-                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600">이자 투자 (고정)</p>
                         <p className="text-xs sm:text-sm font-medium text-gray-900">
                           {option.interest}%
                         </p>
