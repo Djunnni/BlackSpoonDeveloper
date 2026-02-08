@@ -21,6 +21,29 @@ export function MainApp() {
   );
   const [showRegionAlert, setShowRegionAlert] = useState(false);
 
+  // ✅ Native Bridge: moveTab(0~5)
+  // 0홈 1지역 2분석 3분석 4ai상담사 5설정
+  const postMoveTab = (tab: 0 | 1 | 2 | 3 | 4 | 5, message?: string) => {
+    const payload = {
+      type: "moveTab",
+      tab,
+      message: message ?? "hello from web",
+      ts: Date.now(),
+    };
+
+    try {
+      // iOS WKWebView
+      (window as any).webkit?.messageHandlers?.BlackSpoonDevHandler?.postMessage?.(
+        payload,
+      );
+
+      // Android WebView (JavascriptInterface)
+      (window as any).BlackSpoonDevHandler?.postMessage?.(JSON.stringify(payload));
+    } catch (e) {
+      console.error("postMoveTab failed:", e, payload);
+    }
+  };
+
   // 컴포넌트 마운트 시 계좌 정보 로드
   useEffect(() => {
     fetchAccount();
@@ -265,7 +288,13 @@ export function MainApp() {
                 <button
                   onClick={() => {
                     setShowRegionAlert(false);
-                    navigate("/settings");
+
+                    // ✅ 여기서 "지역 탭(1)"으로 네이티브 탭 이동 요청
+                    postMoveTab(1, "go region tab");
+
+                    // (웹 단독 실행 대비 fallback)
+                    // 네이티브가 없을 때만 설정 화면으로 이동시키고 싶으면 아래처럼 조건 처리도 가능
+                    // navigate("/settings");
                   }}
                   className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
                 >
