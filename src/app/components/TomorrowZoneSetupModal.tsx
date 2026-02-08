@@ -72,21 +72,21 @@ const RATIO_OPTIONS = [
     label: "안정형",
     principal: 25,
     interest: 100,
-    description: "원금 25% + 이자 100% (포인트 원금을 이자로 이동) 투자",
+    description: "원금 25% + 이자 100% (포인트로 자동 전환)",
   },
   {
     value: 50,
     label: "균형형",
     principal: 50,
     interest: 100,
-    description: "원금 50% + 이자 100% (포인트 원금을 이자로 이동) 투자",
+    description: "원금 50% + 이자 100% (포인트로 자동 전환)",
   },
   {
     value: 75,
     label: "공격형",
     principal: 75,
     interest: 100,
-    description: "원금 75% + 이자 100% (포인트 원금을 이자로 이동) 투자",
+    description: "원금 75% + 이자 100% (포인트로 자동 전환)",
   },
 ];
 
