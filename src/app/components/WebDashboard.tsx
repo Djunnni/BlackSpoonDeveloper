@@ -368,8 +368,34 @@ export function WebDashboard() {
             )}
 
             {selectedView === 'notifications' && (
-              <div className="bg-white rounded-2xl p-8 border border-gray-200">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">알림 설정</h2>
+              <div className="bg-white rounded-2xl p-8 border border-gray-200 space-y-6">
+                {/* 상단 헤더 */}
+                <div className="relative flex items-center h-12">
+                  {/* 뒤로가기 */}
+                  <button
+                    onClick={handleBackFromNotifications}
+                    aria-label="뒤로가기"
+                    className="
+                      absolute left-0
+                      flex items-center justify-center
+                      w-10 h-10
+                      rounded-full
+                      text-gray-900
+                      hover:bg-gray-100
+                      active:bg-gray-200
+                      transition-colors
+                    "
+                  >
+                    <ArrowLeft className="w-6 h-6 stroke-[2.5]" />
+                  </button>
+
+                  {/* 타이틀 중앙 */}
+                  <h2 className="w-full text-center text-lg font-bold text-gray-900">
+                    알림 설정
+                  </h2>
+                </div>
+
+                {/* 알림 설정 목록 */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl">
                     <div>
@@ -378,9 +404,13 @@ export function WebDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
+                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                        after:h-6 after:w-6 after:bg-white after:rounded-full after:transition-all
+                        peer-checked:after:translate-x-full" />
                     </label>
                   </div>
+
                   <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl">
                     <div>
                       <p className="font-medium text-gray-900">존 변경 알림</p>
@@ -388,9 +418,13 @@ export function WebDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
+                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                        after:h-6 after:w-6 after:bg-white after:rounded-full after:transition-all
+                        peer-checked:after:translate-x-full" />
                     </label>
                   </div>
+
                   <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl">
                     <div>
                       <p className="font-medium text-gray-900">수익률 알림</p>
@@ -398,9 +432,13 @@ export function WebDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" />
-                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
+                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                        after:h-6 after:w-6 after:bg-white after:rounded-full after:transition-all
+                        peer-checked:after:translate-x-full" />
                     </label>
                   </div>
+
                   <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl">
                     <div>
                       <p className="font-medium text-gray-900">마케팅 알림</p>
@@ -408,12 +446,16 @@ export function WebDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
+                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                        after:h-6 after:w-6 after:bg-white after:rounded-full after:transition-all
+                        peer-checked:after:translate-x-full" />
                     </label>
                   </div>
                 </div>
               </div>
             )}
+
           </div>
         </div>
       </div>
