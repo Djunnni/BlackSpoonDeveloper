@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { ArrowRight, Check, Wallet, Building2 } from "lucide-react";
-import { HistoryBackButton } from "./components/HistoryBackButton";
+import {
+  ArrowRight,
+  Check,
+  Wallet,
+  Building2,
+} from "lucide-react";
+import { HistoryBackButton } from "./HistoryBackButton";
 
 export function ChargeMoney() {
-  const [step, setStep] = useState<"input" | "complete">("input");
+  const [step, setStep] = useState<"input" | "complete">(
+    "input",
+  );
   const [amount, setAmount] = useState("");
 
   const quickAmounts = [10000, 50000, 100000, 500000, 1000000];
@@ -90,19 +97,29 @@ export function ChargeMoney() {
         <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="w-5 h-5 text-gray-700" />
-            <span className="text-sm text-gray-700">출금 계좌</span>
+            <span className="text-sm text-gray-700">
+              출금 계좌
+            </span>
           </div>
-          <p className="font-semibold text-gray-900">JB 입출금 계좌</p>
-          <p className="text-sm text-gray-600 mt-1">잔액: 25,340,000원</p>
+          <p className="font-semibold text-gray-900">
+            JB 입출금 계좌
+          </p>
+          <p className="text-sm text-gray-600 mt-1">
+            잔액: 25,340,000원
+          </p>
         </div>
 
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white">
           <div className="flex items-center gap-2 mb-3">
             <Wallet className="w-5 h-5" />
-            <span className="text-sm text-blue-100">입금 금고</span>
+            <span className="text-sm text-blue-100">
+              입금 금고
+            </span>
           </div>
           <p className="font-semibold">JB머니 금고</p>
-          <p className="text-sm text-blue-100 mt-1">잔액: 15,750,000원</p>
+          <p className="text-sm text-blue-100 mt-1">
+            잔액: 15,750,000원
+          </p>
         </div>
       </div>
 
@@ -152,7 +169,9 @@ export function ChargeMoney() {
 
       {/* 안내사항 */}
       <div className="bg-blue-50 rounded-xl p-4">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">충전 안내</h4>
+        <h4 className="text-sm font-medium text-blue-900 mb-2">
+          충전 안내
+        </h4>
         <ul className="space-y-1 text-xs text-blue-700">
           <li>• 최소 충전 금액: 10,000원</li>
           <li>• 수수료: 무료</li>

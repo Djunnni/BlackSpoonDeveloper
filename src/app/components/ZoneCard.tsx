@@ -1,4 +1,4 @@
-import { Shield, TrendingUp, Scale, ChevronRight } from 'lucide-react';
+import { Shield, TrendingUp, Zap, ChevronRight } from 'lucide-react';
 
 interface ZoneCardProps {
   zone: 'interest' | 'extreme' | 'balance';
@@ -13,54 +13,75 @@ export function ZoneCard({ zone, isActive, onClick, isToday }: ZoneCardProps) {
       icon: Shield,
       title: '이자존',
       subtitle: '원금 100% 보호 · 안정적 이자',
-      iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600',
-      borderColor: 'border-blue-500',
-      bgColor: 'bg-blue-50',
+      gradient: 'from-blue-500/20 to-blue-600/10',
+      iconGradient: 'from-blue-400 to-blue-600',
+      glowColor: 'shadow-blue-500/20',
+      borderColor: 'border-blue-500/50',
+      textColor: 'text-blue-400',
     },
     extreme: {
       icon: TrendingUp,
-      title: '익스트림존',
-      subtitle: '이자로만 투자 · 고위험 고수익',
-      iconBg: 'bg-orange-100',
-      iconColor: 'text-orange-600',
-      borderColor: 'border-orange-500',
-      bgColor: 'bg-orange-50',
+      title: '이자워크존',
+      subtitle: '이자로만 투자 · 중위험 중수익',
+      gradient: 'from-orange-500/20 to-orange-600/10',
+      iconGradient: 'from-orange-400 to-orange-600',
+      glowColor: 'shadow-orange-500/20',
+      borderColor: 'border-orange-500/50',
+      textColor: 'text-orange-400',
     },
     balance: {
-      icon: Scale,
-      title: '밸런스존',
-      subtitle: '원금 일부 투자 · 중위험 중수익',
-      iconBg: 'bg-purple-100',
-      iconColor: 'text-purple-600',
-      borderColor: 'border-purple-500',
-      bgColor: 'bg-purple-50',
+      icon: Zap,
+      title: '파워워크존',
+      subtitle: '원금 일부 투자 · 고위험 고수익',
+      gradient: 'from-purple-500/20 to-pink-600/10',
+      iconGradient: 'from-purple-400 to-pink-500',
+      glowColor: 'shadow-purple-500/20',
+      borderColor: 'border-purple-500/50',
+      textColor: 'text-purple-400',
     },
   };
 
   const config = configs[zone];
   const Icon = config.icon;
 
+  const activeStyles = {
+    interest: 'bg-blue-50 border-blue-300',
+    extreme: 'bg-orange-50 border-orange-300',
+    balance: 'bg-purple-50 border-purple-300',
+  };
+
+  const iconColors = {
+    interest: 'from-blue-500 to-blue-600',
+    extreme: 'from-orange-500 to-orange-600',
+    balance: 'from-purple-500 to-pink-500',
+  };
+
+  const textColors = {
+    interest: 'text-blue-600',
+    extreme: 'text-orange-600',
+    balance: 'text-purple-600',
+  };
+
   return (
     <button
       onClick={onClick}
-      className={`w-full p-4 rounded-2xl border-2 transition-all ${
+      className={`w-full p-4 rounded-xl border transition-all duration-200 ${
         isActive
-          ? `${config.bgColor} ${config.borderColor}`
-          : 'bg-white border-gray-200 hover:border-gray-300'
+          ? `${activeStyles[zone]} shadow-md`
+          : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className={`p-2.5 rounded-xl ${config.iconBg}`}>
-          <Icon className={`w-5 h-5 ${config.iconColor}`} />
+        <div className={`bg-gradient-to-br ${iconColors[zone]} p-2 rounded-lg shadow-sm`}>
+          <Icon className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 text-left">
-          <h3 className="font-semibold text-gray-900">
+          <h3 className={`font-semibold ${isActive ? textColors[zone] : 'text-gray-700'}`}>
             {config.title}
           </h3>
-          <p className="text-sm text-gray-600">{config.subtitle}</p>
+          <p className={`text-xs ${isActive ? 'text-gray-600' : 'text-gray-500'}`}>{config.subtitle}</p>
         </div>
-        {!isToday && <ChevronRight className="w-5 h-5 text-gray-400" />}
+        {!isToday && <ChevronRight className={`w-5 h-5 ${isActive ? textColors[zone] : 'text-gray-400'}`} />}
       </div>
     </button>
   );

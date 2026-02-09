@@ -38,9 +38,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // 인증되지 않은 경우 로그인 페이지로 리다이렉트
+  // 인증되지 않은 경우 로그인 페이지(루트)로 리다이렉트
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

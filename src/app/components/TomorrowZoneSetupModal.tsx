@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { TrendingUp, Scale, Check, X, Sparkles } from "lucide-react";
+import { TrendingUp, Scale, Check, X, Sparkles, MessageCircle } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 type Zone = "interest" | "extreme" | "balance";
 
@@ -126,15 +127,15 @@ function buildThemeRecommendation(themeId: string): Pick<AIRecommendation, "reas
 
 export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneSetupModalProps) {
   const [selectedTheme, setSelectedTheme] = useState("us-tech");
-  const [selectedRatio, setSelectedRatio] = useState(25); // ✅ 기본: 안정형 선택
+  const [selectedRatio, setSelectedRatio] = useState(25);
   const [showAIRecommendation, setShowAIRecommendation] = useState(false);
   const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [extremeRatioSelected] = useState(true);
 
   const handleAIRecommendation = async () => {
     setIsLoadingAI(true);
 
-    // Simulate AI processing
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     if (zone === "extreme") {
@@ -150,8 +151,6 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
       setAiRecommendation(mockRecommendation);
       setSelectedTheme(themeId);
     } else {
-      // ✅ 밸런스존: "안정형"을 기본으로 선택 상태로 맞춰주고,
-      // ✅ THEMES 중 랜덤 1개를 뽑아 AI 추천 카드에 보여줌
       setSelectedRatio(25);
 
       const themeId = pickRandomThemeId();
@@ -164,6 +163,7 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
       };
 
       setAiRecommendation(mockRecommendation);
+      setSelectedTheme(themeId);
     }
 
     setShowAIRecommendation(true);
@@ -175,7 +175,8 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
       const selectedThemeData = THEMES.find((t) => t.id === selectedTheme);
       onSave(zone, { theme: selectedThemeData?.name });
     } else {
-      onSave(zone, { ratio: selectedRatio });
+      const selectedThemeData = THEMES.find((t) => t.id === selectedTheme);
+      onSave(zone, { ratio: selectedRatio, theme: selectedThemeData?.name });
     }
   };
 
@@ -185,8 +186,22 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
 
   if (zone === "extreme") {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[75vh] overflow-hidden flex flex-col">
+      <>
+        <Toaster position="bottom-center" toastOptions={{
+          duration: 2000,
+          style: {
+            background: '#fff',
+            color: '#1f2937',
+            borderRadius: '12px',
+            padding: '12px 20px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #f3f4f6',
+          },
+        }} />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
             <div className="flex items-center gap-3">
@@ -205,9 +220,9 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* AI Recommendation Button */}
-              <div>
+              <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border border-gray-100">
                 <button
                   onClick={handleAIRecommendation}
                   disabled={isLoadingAI}
@@ -216,14 +231,14 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                   <Sparkles className="w-5 h-5" />
                   {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
                 </button>
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라 이루어집니다.
+                <p className="mt-3 text-[11px] text-gray-500 text-center leading-relaxed whitespace-nowrap">
+                  💡 인기 테마 기반 AI 추천입니다. 투자 결정은 신중히 하세요.
                 </p>
               </div>
 
               {/* AI Recommendation Result */}
               {showAIRecommendation && aiRecommendation && (
-                <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
+                <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-purple-600" />
@@ -252,19 +267,62 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <div className="p-3 bg-white/80 rounded-lg">
-                      <p className="text-sm font-medium text-gray-900 mb-1">추천 이유</p>
-                      <p className="text-sm text-gray-700">{aiRecommendation.reason}</p>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-white/80 rounded-lg border border-purple-100">
+                      <p className="text-xs font-semibold text-purple-700 mb-2">추천 이유</p>
+                      <p className="text-sm text-gray-700 leading-relaxed">{aiRecommendation.reason}</p>
                     </div>
-                    <div className="p-3 bg-white/80 rounded-lg">
-                      <p className="text-sm font-medium text-gray-900 mb-1">시장 분석</p>
-                      <p className="text-sm text-gray-700">{aiRecommendation.marketAnalysis}</p>
-                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        toast.success("AI 상담 기능은 준비 중입니다");
+                      }}
+                      className="w-full p-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all shadow-md hover:shadow-lg"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span className="text-sm">AI 상담사와 대화하기</span>
+                    </button>
                   </div>
                 </div>
               )}
 
+              {/* 투자 비율 - 고정 */}
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-1">투자 비율</h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  이자워크존은 이자만으로 투자하여 원금을 100% 보호합니다
+                </p>
+                
+                <div className={`w-full p-4 rounded-xl border-2 transition-all ${
+                  extremeRatioSelected
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-gray-200 bg-white"
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-orange-100 rounded-lg">
+                        <TrendingUp className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900 mb-0.5">안정형 이자 투자</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-orange-600">이자 100%</span>
+                          <span className="text-xs text-gray-500">·</span>
+                          <span className="text-sm font-medium text-blue-600">원금 보호</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {extremeRatioSelected && (
+                      <div className="p-1.5 bg-orange-500 rounded-full">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 테마 선택 */}
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1">테마 선택</h3>
                 <p className="text-sm text-gray-600 mb-4">투자할 테마를 선택하세요</p>
@@ -274,7 +332,10 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                 {THEMES.map((theme) => (
                   <button
                     key={theme.id}
-                    onClick={() => setSelectedTheme(theme.id)}
+                    onClick={() => {
+                      setSelectedTheme(theme.id);
+                      toast.success(`${theme.icon} ${theme.name} 테마가 선택되었어요`);
+                    }}
                     className={`p-3 sm:p-4 rounded-xl border-2 transition-all text-left ${
                       selectedTheme === theme.id
                         ? "border-orange-500 bg-orange-50"
@@ -314,13 +375,28 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
           </div>
         </div>
       </div>
+      </>
     );
   }
 
-  // Balance Zone
+  // Balance Zone (파워워크존)
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[70vh] overflow-hidden flex flex-col">
+    <>
+      <Toaster position="bottom-center" toastOptions={{
+        duration: 2000,
+        style: {
+          background: '#fff',
+          color: '#1f2937',
+          borderRadius: '12px',
+          padding: '12px 20px',
+          fontSize: '14px',
+          fontWeight: '600',
+          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+          border: '1px solid #f3f4f6',
+        },
+      }} />
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
@@ -339,9 +415,9 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <div className="space-y-4">
-            {/* ✅ 밸런스존 AI 버튼: 테마 랜덤 추천 + 안정형(25) 자동 선택 */}
-            <div>
+          <div className="space-y-6">
+            {/* AI Recommendation Button */}
+            <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-4 border border-gray-100">
               <button
                 onClick={handleAIRecommendation}
                 disabled={isLoadingAI}
@@ -350,14 +426,14 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                 <Sparkles className="w-5 h-5" />
                 {isLoadingAI ? "AI 분석 중..." : "AI를 통한 테마 추천받기"}
               </button>
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                AI 추천은 참고용 보조 기능이며, 투자 결정은 고객님의 판단에 따라 이루어집니다.
+              <p className="mt-3 text-[11px] text-gray-500 text-center leading-relaxed whitespace-nowrap">
+                💡 인기 테마 기반 AI 추천입니다. 투자 결정은 신중히 하세요.
               </p>
             </div>
 
-            {/* ✅ AI Recommendation Result (밸런스존: 추천 테마를 옆(상단 우측)으로 예쁘게 보여줌) */}
+            {/* AI Recommendation Result */}
             {showAIRecommendation && aiRecommendation && (
-              <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl">
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-purple-600" />
@@ -386,19 +462,26 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <div className="p-3 bg-white/80 rounded-lg">
-                    <p className="text-sm font-medium text-gray-900 mb-1">추천 이유</p>
-                    <p className="text-sm text-gray-700">{aiRecommendation.reason}</p>
+                <div className="space-y-3">
+                  <div className="p-3 bg-white/80 rounded-lg border border-purple-100">
+                    <p className="text-xs font-semibold text-purple-700 mb-2">추천 이유</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">{aiRecommendation.reason}</p>
                   </div>
-                  <div className="p-3 bg-white/80 rounded-lg">
-                    <p className="text-sm font-medium text-gray-900 mb-1">시장 분석</p>
-                    <p className="text-sm text-gray-700">{aiRecommendation.marketAnalysis}</p>
-                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      toast.success("AI 상담 기능은 준비 중입니다");
+                    }}
+                    className="w-full p-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all shadow-md hover:shadow-lg"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span className="text-sm">AI 상담사와 대화하기</span>
+                  </button>
                 </div>
               </div>
             )}
 
+            {/* 투자 비율 선택 */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">투자 비율 선택</h3>
               <p className="text-sm text-gray-600 mb-4">
@@ -470,6 +553,40 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                 </button>
               ))}
             </div>
+
+            {/* 테마 선택 */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">테마 선택</h3>
+              <p className="text-sm text-gray-600 mb-4">투자할 테마를 선택하세요</p>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+              {THEMES.map((theme) => (
+                <button
+                  key={theme.id}
+                  onClick={() => {
+                    setSelectedTheme(theme.id);
+                    toast.success(`${theme.icon} ${theme.name} 테마가 선택되었어요`);
+                  }}
+                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all text-left ${
+                    selectedTheme === theme.id
+                      ? "border-purple-500 bg-purple-50"
+                      : "border-gray-200 bg-white hover:border-gray-300"
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="text-2xl sm:text-3xl">{theme.icon}</span>
+                    {selectedTheme === theme.id && (
+                      <div className="p-0.5 bg-purple-500 rounded-full">
+                        <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  <h4 className="font-semibold text-gray-900 text-sm mb-1">{theme.name}</h4>
+                  <p className="text-xs text-gray-600 leading-tight">{theme.description}</p>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -490,5 +607,6 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
         </div>
       </div>
     </div>
+    </>
   );
 }

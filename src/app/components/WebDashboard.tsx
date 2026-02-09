@@ -24,8 +24,8 @@ const DAILY_CHART_DATA = [
 
 const ZONE_DISTRIBUTION = [
   { name: '이자존', value: 60, color: '#3b82f6' },
-  { name: '익스트림존', value: 15, color: '#f97316' },
-  { name: '밸런스존', value: 25, color: '#9333ea' },
+  { name: '이자워크존', value: 15, color: '#f97316' },
+  { name: '파워워크존', value: 25, color: '#9333ea' },
 ];
 
 export function WebDashboard() {
@@ -121,55 +121,30 @@ export function WebDashboard() {
               </div>
             </div>
 
-            {/* Today Zone */}
-            <div className="bg-white rounded-2xl p-5 border border-gray-200">
-              <div className="mb-3">
-                <h3 className="font-semibold text-gray-900">오늘 투자중인 존</h3>
-              </div>
-              <div className={`p-4 rounded-xl border-2 ${
-                todayZone === 'interest'
-                  ? 'bg-blue-50 border-blue-500'
-                  : todayZone === 'extreme'
-                  ? 'bg-orange-50 border-orange-500'
-                  : 'bg-purple-50 border-purple-500'
-              }`}>
+            {/* Today Zone - 컴팩트 디자인 */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-5 shadow-lg">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {todayZone === 'interest' && (
-                    <>
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <Shield className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-blue-900">이자존</p>
-                        <p className="text-sm text-blue-700">원금 100% 보호</p>
-                      </div>
-                    </>
-                  )}
-                  {todayZone === 'extreme' && (
-                    <>
-                      <div className="p-2 bg-orange-100 rounded-lg">
-                        <TrendingUp className="w-5 h-5 text-orange-600" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-orange-900">익스트림존</p>
-                        <p className="text-sm text-orange-700">이자만 투자</p>
-                      </div>
-                    </>
-                  )}
-                  {todayZone === 'balance' && (
-                    <>
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <Scale className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-purple-900">밸런스존</p>
-                        <p className="text-sm text-purple-700">원금 일부 투자</p>
-                      </div>
-                    </>
-                  )}
+                  <div className="p-2.5 bg-white/20 rounded-lg backdrop-blur-sm">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-blue-100 mb-1">투자중인 존 · 오늘</p>
+                    <h3 className="font-bold text-white text-lg">
+                      {todayZone === 'interest' && '이자존'}
+                      {todayZone === 'extreme' && '이자워크존'}
+                      {todayZone === 'balance' && '파워워크존'}
+                    </h3>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-blue-100 mb-1">일 수익률</p>
+                  <p className="font-bold text-white text-lg">+{totalReturn}%</p>
                 </div>
               </div>
             </div>
+
+
 
             {/* Tomorrow Zone */}
             <div className="bg-white rounded-2xl p-5 border border-gray-200">
@@ -368,34 +343,8 @@ export function WebDashboard() {
             )}
 
             {selectedView === 'notifications' && (
-              <div className="bg-white rounded-2xl p-8 border border-gray-200 space-y-6">
-                {/* 상단 헤더 */}
-                <div className="relative flex items-center h-12">
-                  {/* 뒤로가기 */}
-                  <button
-                    onClick={handleBackFromNotifications}
-                    aria-label="뒤로가기"
-                    className="
-                      absolute left-0
-                      flex items-center justify-center
-                      w-10 h-10
-                      rounded-full
-                      text-gray-900
-                      hover:bg-gray-100
-                      active:bg-gray-200
-                      transition-colors
-                    "
-                  >
-                    <ArrowLeft className="w-6 h-6 stroke-[2.5]" />
-                  </button>
-
-                  {/* 타이틀 중앙 */}
-                  <h2 className="w-full text-center text-lg font-bold text-gray-900">
-                    알림 설정
-                  </h2>
-                </div>
-
-                {/* 알림 설정 목록 */}
+              <div className="bg-white rounded-2xl p-8 border border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">알림 설정</h2>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl">
                     <div>
@@ -404,13 +353,9 @@ export function WebDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
-                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                        after:h-6 after:w-6 after:bg-white after:rounded-full after:transition-all
-                        peer-checked:after:translate-x-full" />
+                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-
                   <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl">
                     <div>
                       <p className="font-medium text-gray-900">존 변경 알림</p>
@@ -418,13 +363,9 @@ export function WebDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
-                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                        after:h-6 after:w-6 after:bg-white after:rounded-full after:transition-all
-                        peer-checked:after:translate-x-full" />
+                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-
                   <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl">
                     <div>
                       <p className="font-medium text-gray-900">수익률 알림</p>
@@ -432,13 +373,9 @@ export function WebDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" />
-                      <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
-                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                        after:h-6 after:w-6 after:bg-white after:rounded-full after:transition-all
-                        peer-checked:after:translate-x-full" />
+                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-
                   <div className="flex items-center justify-between p-5 bg-gray-50 rounded-xl">
                     <div>
                       <p className="font-medium text-gray-900">마케팅 알림</p>
@@ -446,16 +383,12 @@ export function WebDashboard() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
-                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                        after:h-6 after:w-6 after:bg-white after:rounded-full after:transition-all
-                        peer-checked:after:translate-x-full" />
+                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
                 </div>
               </div>
             )}
-
           </div>
         </div>
       </div>

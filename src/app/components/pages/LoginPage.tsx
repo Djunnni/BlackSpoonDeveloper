@@ -16,8 +16,8 @@ export function LoginPage() {
 
     try {
       await login(email, password);
-      // 로그인 성공 시 홈으로 이동
-      navigate('/', { replace: true });
+      // 로그인 성공 시 메인으로 이동
+      navigate('/main', { replace: true });
     } catch (err) {
       // 에러는 스토어에서 처리
       console.error('Login failed:', err);
@@ -63,7 +63,6 @@ export function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="example@email.com"
-                required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               />
             </div>
@@ -78,7 +77,6 @@ export function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               />
             </div>

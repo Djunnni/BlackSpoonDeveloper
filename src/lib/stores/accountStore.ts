@@ -2,6 +2,19 @@ import { create } from 'zustand';
 import type { Account, SelectZoneRequest } from '../api/types';
 import { accountApi } from '../api/services';
 
+// 개발 중에는 기본적으로 Mock 모드 사용
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_API !== 'false';
+
+// Mock 계좌 데이터
+const mockAccount: Account = {
+  accountId: 'account-1',
+  balance: 15750000,
+  todayInterest: 329,
+  dailyReturnRate: 0.0033,
+  currentZone: 'interest',
+  nextZone: 'interest',
+};
+
 interface AccountState {
   // 상태
   account: Account | null;
@@ -15,13 +28,22 @@ interface AccountState {
 }
 
 export const useAccountStore = create<AccountState>((set) => ({
-  // 초기 상태
-  account: null,
+  // 초기 상태 - Mock 모드일 때는 초기 데이터 제공
+  account: USE_MOCK ? mockAccount : null,
   isLoading: false,
   error: null,
 
   // 계좌 정보 조회
   fetchAccount: async () => {
+    // Mock 모드일 때는 이미 초기 데이터가 있으므로 빠르게 처리
+    if (USE_MOCK) {
+      set({ isLoading: true });
+      setTimeout(() => {
+        set({ account: mockAccount, isLoading: false });
+      }, 300);
+      return;
+    }
+
     set({ isLoading: true, error: null });
     try {
       const account = await accountApi.getAccount();
@@ -31,12 +53,30 @@ export const useAccountStore = create<AccountState>((set) => ({
         error: error.response?.data?.message || '계좌 정보를 불러오는데 실패했습니다.',
         isLoading: false,
       });
-      throw error;
+      // 에러를 던지지 않고 기본값 설정
+      console.error('Failed to fetch account:', error);
     }
   },
 
   // 존 선택
   selectZone: async (data: SelectZoneRequest) => {
+    // Mock 모드일 때는 로컬 상태만 업데이트
+    if (USE_MOCK) {
+      set({ isLoading: true });
+      setTimeout(() => {
+        set((state) => ({
+          account: state.account ? {
+            ...state.account,
+            nextZone: data.zone,
+            extremeTheme: data.theme,
+            balanceRatio: data.ratio,
+          } : null,
+          isLoading: false,
+        }));
+      }, 400);
+      return;
+    }
+
     set({ isLoading: true, error: null });
     try {
       const account = await accountApi.selectZone(data);
@@ -46,7 +86,7 @@ export const useAccountStore = create<AccountState>((set) => ({
         error: error.response?.data?.message || '존 선택에 실패했습니다.',
         isLoading: false,
       });
-      throw error;
+      console.error('Failed to select zone:', error);
     }
   },
 

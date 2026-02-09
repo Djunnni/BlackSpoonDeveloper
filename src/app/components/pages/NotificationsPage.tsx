@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Layout } from "../Layout";
 import { Bell, TrendingUp, TrendingDown, Clock } from "lucide-react";
-import { HistoryBackButton } from "../components/HistoryBackButton";
+import { HistoryBackButton } from "../HistoryBackButton";
 
 export function NotificationsPage() {
   const [pushEnabled, setPushEnabled] = useState(true);

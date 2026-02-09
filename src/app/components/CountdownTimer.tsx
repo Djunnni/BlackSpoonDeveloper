@@ -63,9 +63,9 @@ export function CountdownTimer() {
   const colors = getColorClasses();
 
   return (
-    <div className={`flex items-center gap-1.5 px-3 py-1.5 ${colors.bg} rounded-lg border ${colors.border}`}>
-      <Clock className={`w-4 h-4 ${colors.icon}`} />
-      <span className={`text-sm font-semibold ${colors.text} tabular-nums`}>
+    <div className={`flex items-center gap-1.5 px-2.5 py-1 ${colors.bg} rounded-lg border ${colors.border}`}>
+      <Clock className={`w-3.5 h-3.5 ${colors.icon}`} />
+      <span className={`text-xs font-semibold ${colors.text} tabular-nums`}>
         {timeLeft}
       </span>
     </div>

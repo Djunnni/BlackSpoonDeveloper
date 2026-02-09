@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
-import { Bell, Wallet, AlertTriangle, TrendingUp, Vault } from "lucide-react";
+import { Bell, Wallet, AlertTriangle, TrendingUp, Landmark } from "lucide-react";
 import { ZoneCard } from "./ZoneCard";
 import { CountdownTimer } from "./CountdownTimer";
 import { TomorrowZoneSelector } from "./TomorrowZoneSelector";
@@ -262,9 +262,9 @@ export function MainApp() {
                   {/* 왼쪽: 금고 아이콘 + 타이틀 */}
                   <div className="flex items-center gap-2.5 animate-countUp">
                     <div className="relative animate-float">
-                      <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg blur-md opacity-70 animate-pulse"></div>
-                      <div className="relative bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-2 rounded-lg shadow-lg">
-                        <Vault className="w-5 h-5 text-slate-900" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl blur-md opacity-70 animate-pulse"></div>
+                      <div className="relative bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-2.5 rounded-xl shadow-lg">
+                        <Landmark className="w-5 h-5 text-slate-900 stroke-[2.5]" />
                       </div>
                     </div>
                     <div>
@@ -320,11 +320,11 @@ export function MainApp() {
                     </div>
                   </div>
 
-                  {/* 이자 (JB머니) */}
+                  {/* 이자 (발생 이자) */}
                   <div className="flex-1 bg-gradient-to-br from-emerald-900/40 to-emerald-800/20 rounded-xl px-2.5 py-2 border border-emerald-500/30 backdrop-blur-sm hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300 animate-countUp" style={{ animationDelay: '0.1s' }}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                      <span className="text-[10px] text-emerald-300 font-medium">JB 머니</span>
+                      <span className="text-[10px] text-emerald-300 font-medium">발생 이자</span>
                     </div>
                     <div className="text-sm font-bold text-emerald-400 leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
                       +{(account?.totalInterest || 0).toLocaleString()}

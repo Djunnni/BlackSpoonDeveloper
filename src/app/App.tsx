@@ -13,14 +13,12 @@ export default function App() {
   return (
     <HashRouter>
       <Routes>
-        {/* Mock 모드가 아닐 때만 로그인 페이지 제공 */}
-        {!USE_MOCK && <Route path="/login" element={<LoginPage />} />}
+        {/* 바로 메인 화면으로 이동 */}
+        <Route path="/" element={<Navigate to="/main" replace />} />
         
-        {/* Mock 모드일 때 /login 접근 시 홈으로 리다이렉트 */}
-        {USE_MOCK && <Route path="/login" element={<Navigate to="/" replace />} />}
-        
+        {/* 메인 앱 */}
         <Route
-          path="/"
+          path="/main"
           element={
             <ProtectedRoute>
               <MainApp />
