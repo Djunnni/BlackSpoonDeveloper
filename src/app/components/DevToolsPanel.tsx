@@ -62,7 +62,7 @@ export function DevToolsPanel() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+        className="fixed top-1/2 right-4 -translate-y-1/2 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
         aria-label="개발자 도구 열기"
       >
         <Settings className="w-5 h-5" />
@@ -71,7 +71,7 @@ export function DevToolsPanel() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-slate-900 text-white rounded-lg shadow-2xl w-80 p-4 border border-slate-700">
+    <div className="fixed top-1/2 right-4 -translate-y-1/2 z-50 bg-slate-900 text-white rounded-lg shadow-2xl w-80 p-4 border border-slate-700 max-h-[80vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-sm">🛠️ 개발자 도구</h3>
         <button

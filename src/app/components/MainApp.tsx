@@ -233,6 +233,17 @@ export function MainApp() {
 
   // ✅ 네이티브 메시지 핸들러
   const onNativeMessage = useCallback((payload: any) => {
+    console.log('[MainApp] Received native message:', payload);
+    
+    // ✅ iOS에서 accessTokenInfo 메시지 받기
+    if (payload?.type === "accessTokenInfo") {
+      // nativeBridge.ts의 전역 핸들러로 전달
+      if ((window as any).handleAccessTokenInfo) {
+        (window as any).handleAccessTokenInfo(payload.data || payload);
+      }
+      return;
+    }
+    
     // 지역 선택 이벤트
     if (payload?.type === "regionSelected") {
       setTempHasRegion(false);
@@ -270,6 +281,13 @@ export function MainApp() {
       onCustom as any,
     );
 
+    // ✅ iOS가 보내는 함수 등록: window.BlackSpoonDevNativeReceive
+    (window as any).BlackSpoonDevNativeReceive = (payload: any) => {
+      console.log('[MainApp] BlackSpoonDevNativeReceive called:', payload);
+      onNativeMessage(payload);
+    };
+
+    // 기존 방식도 유지 (호환성)
     (window as any).BlackSpoonDevWeb =
       (window as any).BlackSpoonDevWeb || {};
     (window as any).BlackSpoonDevWeb.onNativeMessage = (
@@ -285,6 +303,9 @@ export function MainApp() {
         onCustom as any,
       );
       try {
+        // ✅ iOS 함수 정리
+        delete (window as any).BlackSpoonDevNativeReceive;
+        
         if ((window as any).BlackSpoonDevWeb?.onNativeMessage) {
           delete (window as any).BlackSpoonDevWeb
             .onNativeMessage;

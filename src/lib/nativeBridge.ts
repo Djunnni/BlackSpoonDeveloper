@@ -49,6 +49,29 @@ const postToNative = (payload: NativeMessage) => {
   }
 };
 
+// ✅ AccessToken Promise 관리
+let tokenPromiseResolver: ((token: string) => void) | null = null;
+let tokenPromiseRejector: ((error: Error) => void) | null = null;
+
+// ✅ iOS에서 accessTokenInfo 메시지를 받을 전역 핸들러
+if (typeof window !== "undefined") {
+  (window as any).handleAccessTokenInfo = (data: any) => {
+    console.log('[NativeBridge] Received accessTokenInfo:', data);
+    
+    if (tokenPromiseResolver) {
+      if (data && data.accessToken) {
+        tokenPromiseResolver(data.accessToken);
+        tokenPromiseResolver = null;
+        tokenPromiseRejector = null;
+      } else if (tokenPromiseRejector) {
+        tokenPromiseRejector(new Error("Invalid accessToken response"));
+        tokenPromiseResolver = null;
+        tokenPromiseRejector = null;
+      }
+    }
+  };
+}
+
 export const NativeBridge = {
   moveTab(tab: NativeTabIndex, message?: string) {
     const payload: NativeMessage = {
@@ -63,34 +86,36 @@ export const NativeBridge = {
   // ✅ AccessToken 요청 (Promise 반환)
   requestAccessToken(): Promise<string> {
     return new Promise((resolve, reject) => {
-      const callbackId = "tokenInfo";
       const timeout = 5000;
 
       // 타임아웃 설정
       const timeoutId = setTimeout(() => {
-        delete (window as any)[callbackId];
-        reject(new Error("AccessToken request timeout"));
+        if (tokenPromiseRejector) {
+          tokenPromiseRejector(new Error("AccessToken request timeout"));
+          tokenPromiseResolver = null;
+          tokenPromiseRejector = null;
+        }
       }, timeout);
 
-      // 콜백 등록
-      (window as any)[callbackId] = (data: any) => {
+      // Promise resolver 저장
+      tokenPromiseResolver = (token: string) => {
         clearTimeout(timeoutId);
-        delete (window as any)[callbackId];
-        
-        if (data && data.accessToken) {
-          resolve(data.accessToken);
-        } else {
-          reject(new Error("Invalid accessToken response"));
-        }
+        resolve(token);
+      };
+      
+      tokenPromiseRejector = (error: Error) => {
+        clearTimeout(timeoutId);
+        reject(error);
       };
 
       // Native에 요청 전송
       const payload: NativeMessage = {
         type: "accessTokenInfo",
-        callbackId: callbackId,
         ts: Date.now(),
       };
       postToNative(payload);
+      
+      console.log('[NativeBridge] Requested accessTokenInfo');
     });
   },
 
