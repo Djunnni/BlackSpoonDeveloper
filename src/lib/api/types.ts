@@ -5,6 +5,7 @@ export interface User {
   email: string;
   phoneNumber?: string;
   regionCode?: string; // 지역 코드 (null 또는 "000000"이면 미선택)
+  regionName?: string; // 지역 이름 (예: "서울특별시 강남구")
   createdAt: string;
 }
 
