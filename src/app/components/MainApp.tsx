@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
-import { Bell, Wallet, AlertTriangle } from "lucide-react";
+import { Bell, Wallet, AlertTriangle, TrendingUp, Vault } from "lucide-react";
 import { ZoneCard } from "./ZoneCard";
+import { CountdownTimer } from "./CountdownTimer";
 import { TomorrowZoneSelector } from "./TomorrowZoneSelector";
 import { TomorrowZoneSetupModal } from "./TomorrowZoneSetupModal";
 import { useAuthStore } from "../../lib/stores/authStore";
@@ -13,13 +14,16 @@ type Zone = "interest" | "extreme" | "balance";
 export function MainApp() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { account, fetchAccount, selectZone, isLoading } = useAccountStore();
+  const { account, fetchAccount, selectZone, isLoading } =
+    useAccountStore();
 
-  const [showTomorrowZoneSetup, setShowTomorrowZoneSetup] = useState(false);
-  const [setupZoneType, setSetupZoneType] = useState<"extreme" | "balance">(
-    "extreme",
-  );
+  const [showTomorrowZoneSetup, setShowTomorrowZoneSetup] =
+    useState(false);
+  const [setupZoneType, setSetupZoneType] = useState<
+    "extreme" | "balance"
+  >("extreme");
   const [showRegionAlert, setShowRegionAlert] = useState(false);
+  const [showAllZones, setShowAllZones] = useState(false);
 
   // ✅ 개발 중 강제 활성화 (이거 true면 지역 없어도 밸런스/익스트림 무조건 열린다)
   const DEV_FORCE_ZONE_ENABLE = true;
@@ -30,7 +34,10 @@ export function MainApp() {
 
   // ✅ Native Bridge: moveTab(0~5)
   // 0홈 1지역 2분석 3분석 4ai상담사 5설정
-  const postMoveTab = (tab: 0 | 1 | 2 | 3 | 4 | 5, message?: string) => {
+  const postMoveTab = (
+    tab: 0 | 1 | 2 | 3 | 4 | 5,
+    message?: string,
+  ) => {
     const payload = {
       type: "moveTab",
       tab,
@@ -39,7 +46,9 @@ export function MainApp() {
     };
 
     try {
-      (window as any).webkit?.messageHandlers?.BlackSpoonDevHandler?.postMessage?.(
+      (
+        window as any
+      ).webkit?.messageHandlers?.BlackSpoonDevHandler?.postMessage?.(
         payload,
       );
       (window as any).BlackSpoonDevHandler?.postMessage?.(
@@ -56,10 +65,13 @@ export function MainApp() {
   }, [fetchAccount]);
 
   // ✅ 원래 지역 판단
-  const realHasRegion = !!(user?.regionCode && user.regionCode !== "000000");
+  const realHasRegion = !!(
+    user?.regionCode && user.regionCode !== "000000"
+  );
 
   // ✅ 최종: 개발용 강제 활성화 or 임시 활성화가 켜져 있으면 true
-  const hasRegion = realHasRegion || tempHasRegion || DEV_FORCE_ZONE_ENABLE;
+  const hasRegion =
+    realHasRegion || tempHasRegion || DEV_FORCE_ZONE_ENABLE;
 
   // ✅ (옵션) 네이티브 regionSelected 이벤트도 같이 받기
   const onNativeRegionSelected = useCallback((payload: any) => {
@@ -72,7 +84,10 @@ export function MainApp() {
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
       try {
-        const data = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        const data =
+          typeof e.data === "string"
+            ? JSON.parse(e.data)
+            : e.data;
         onNativeRegionSelected(data);
       } catch {
         onNativeRegionSelected(e.data);
@@ -85,19 +100,29 @@ export function MainApp() {
     };
 
     window.addEventListener("message", onMessage);
-    window.addEventListener("BlackSpoonDevNative", onCustom as any);
+    window.addEventListener(
+      "BlackSpoonDevNative",
+      onCustom as any,
+    );
 
-    (window as any).BlackSpoonDevWeb = (window as any).BlackSpoonDevWeb || {};
-    (window as any).BlackSpoonDevWeb.onNativeMessage = (p: any) => {
+    (window as any).BlackSpoonDevWeb =
+      (window as any).BlackSpoonDevWeb || {};
+    (window as any).BlackSpoonDevWeb.onNativeMessage = (
+      p: any,
+    ) => {
       onNativeRegionSelected(p);
     };
 
     return () => {
       window.removeEventListener("message", onMessage);
-      window.removeEventListener("BlackSpoonDevNative", onCustom as any);
+      window.removeEventListener(
+        "BlackSpoonDevNative",
+        onCustom as any,
+      );
       try {
         if ((window as any).BlackSpoonDevWeb?.onNativeMessage) {
-          delete (window as any).BlackSpoonDevWeb.onNativeMessage;
+          delete (window as any).BlackSpoonDevWeb
+            .onNativeMessage;
         }
       } catch {}
     };
@@ -147,8 +172,8 @@ export function MainApp() {
 
   const getZoneLabel = (zone?: Zone) => {
     if (zone === "interest") return "이자존";
-    if (zone === "extreme") return "익스트림존";
-    if (zone === "balance") return "밸런스존";
+    if (zone === "extreme") return "이자워크존";
+    if (zone === "balance") return "파워워크존";
     return "이자존";
   };
 
@@ -160,7 +185,9 @@ export function MainApp() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">계좌 정보를 불러오는 중...</p>
+              <p className="text-gray-600">
+                계좌 정보를 불러오는 중...
+              </p>
             </div>
           </div>
         </div>
@@ -185,35 +212,125 @@ export function MainApp() {
       <div className="h-[100dvh] overflow-hidden flex flex-col">
         {/* ✅ 1) 고정 헤더 영역 */}
         <div className="shrink-0 bg-white">
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
-            {/* Balance Card */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white mb-4">
-              <div className="mb-4">
-                <p className="text-sm text-blue-100">JB 머니</p>
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-3">
+            {/* Premium Vault Card */}
+            <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-5 overflow-hidden shadow-2xl border border-slate-700/50 group">
+              {/* 배경 패턴 */}
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+                  backgroundSize: '32px 32px'
+                }}></div>
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold mb-6">
-                {(account?.balance || 0).toLocaleString()}원
-              </h1>
+              
+              {/* 금빛 그라데이션 효과 - 애니메이션 */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
+              
+              {/* 반짝이는 라인 효과 */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent animate-shimmer"></div>
+              </div>
+              
+              <style>{`
+                @keyframes shimmer {
+                  0% { transform: translateX(-100%); }
+                  100% { transform: translateX(100%); }
+                }
+                @keyframes countUp {
+                  from { opacity: 0; transform: translateY(10px); }
+                  to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes float {
+                  0%, 100% { transform: translateY(0px); }
+                  50% { transform: translateY(-5px); }
+                }
+                .animate-shimmer {
+                  animation: shimmer 3s infinite;
+                }
+                .animate-countUp {
+                  animation: countUp 0.6s ease-out forwards;
+                }
+                .animate-float {
+                  animation: float 3s ease-in-out infinite;
+                }
+              `}</style>
+              
+              <div className="relative z-10">
+                {/* 상단: 지역 + 금고 헤더 통합 */}
+                <div className="flex items-center justify-between mb-3.5">
+                  {/* 왼쪽: 금고 아이콘 + 타이틀 */}
+                  <div className="flex items-center gap-2.5 animate-countUp">
+                    <div className="relative animate-float">
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg blur-md opacity-70 animate-pulse"></div>
+                      <div className="relative bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-2 rounded-lg shadow-lg">
+                        <Vault className="w-5 h-5 text-slate-900" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-slate-500 leading-tight">이자불림금고</div>
+                      <div className="text-sm font-bold bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent leading-tight">JB 머니</div>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-xs text-blue-100 mb-1">오늘 발생 이자</p>
-                  <p className="text-lg font-semibold">
-                    +{(account?.todayInterest || 0).toLocaleString()}원
-                  </p>
+                  {/* 오른쪽: 지역 정보 */}
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300">
+                    <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {user?.regionName || "전북특별자치도 전주시 덕진구"}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-blue-100 mb-1">일 수익률</p>
-                  <p
-                    className={`text-lg font-semibold ${
-                      (account?.dailyReturnRate || 0) >= 0
-                        ? "text-green-300"
-                        : "text-red-300"
-                    }`}
-                  >
-                    {(account?.dailyReturnRate || 0) >= 0 ? "+" : ""}
-                    {((account?.dailyReturnRate || 0) * 100).toFixed(2)}%
-                  </p>
+                
+                {/* 총 자산 - 애니메이션 */}
+                <div className="mb-3.5 animate-countUp" style={{ animationDelay: '0.1s' }}>
+                  <h1 className="text-[32px] font-bold text-white tracking-tight leading-none transition-all duration-300 hover:text-amber-100" style={{ 
+                    textShadow: '0 0 20px rgba(251, 191, 36, 0.3)',
+                    fontVariantNumeric: 'tabular-nums'
+                  }}>
+                    {(account?.balance || 0).toLocaleString()}
+                    <span className="text-lg text-slate-400 ml-1.5 font-normal">원</span>
+                  </h1>
+                </div>
+
+                {/* 원금 & 이자 구분 - 애니메이션 */}
+                <div className="flex items-center gap-2" style={{ animationDelay: '0.2s' }}>
+                  {/* 원금 */}
+                  <div className="flex-1 bg-gradient-to-br from-slate-800/80 to-slate-800/40 rounded-xl px-2.5 py-2 border border-slate-700/50 backdrop-blur-sm hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 animate-countUp">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                      <span className="text-[10px] text-slate-400 font-medium">보호 원금</span>
+                    </div>
+                    <div className="text-sm font-bold text-white leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {((account?.balance || 0) - (account?.totalInterest || 0)).toLocaleString()}
+                      <span className="text-[10px] text-slate-400 ml-0.5 font-normal">원</span>
+                    </div>
+                  </div>
+
+                  {/* 이자 (JB머니) */}
+                  <div className="flex-1 bg-gradient-to-br from-emerald-900/40 to-emerald-800/20 rounded-xl px-2.5 py-2 border border-emerald-500/30 backdrop-blur-sm hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300 animate-countUp" style={{ animationDelay: '0.1s' }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                      <span className="text-[10px] text-emerald-300 font-medium">JB 머니</span>
+                    </div>
+                    <div className="text-sm font-bold text-emerald-400 leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      +{(account?.totalInterest || 0).toLocaleString()}
+                      <span className="text-[10px] text-emerald-300 ml-0.5 font-normal">원</span>
+                    </div>
+                  </div>
+
+                  {/* 선택중 테마 */}
+                  {account?.nextZone === "extreme" && account?.extremeTheme && (
+                    <div className="flex-1 bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-xl px-2.5 py-2 border border-purple-500/30 backdrop-blur-sm hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 animate-countUp" style={{ animationDelay: '0.2s' }}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
+                        <span className="text-[10px] text-purple-300 font-medium">선택 테마</span>
+                      </div>
+                      <div className="text-sm font-bold text-white leading-tight truncate">
+                        {account.extremeTheme}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -229,7 +346,9 @@ export function MainApp() {
                       : "bg-white text-gray-800 border-gray-200 hover:bg-gray-50"
                   }`}
                 >
-                  {tempHasRegion ? "임시 지역 ON (해제)" : "임시로 밸런스존 활성화"}
+                  {tempHasRegion
+                    ? "임시 지역 ON (해제)"
+                    : "임시로 파워워크존 활성화"}
                 </button>
                 <p className="text-xs text-gray-500">
                   (개발용) regionSelected 연동 전 잠깐 테스트용
@@ -246,7 +365,8 @@ export function MainApp() {
                     지역 선택이 필요합니다
                   </p>
                   <p className="text-xs text-yellow-700 mb-2">
-                    익스트림존과 밸런스존을 이용하시려면 지역을 먼저 선택해주세요.
+                    이자워크존과 파워워크존을 이용하시려면 지역을
+                    먼저 선택해주세요.
                   </p>
                   <button
                     onClick={() => {
@@ -287,38 +407,105 @@ export function MainApp() {
           <div
             className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
             style={{
-              paddingBottom: "calc(env(safe-area-inset-bottom) + 120px)",
+              paddingBottom:
+                "calc(env(safe-area-inset-bottom) + 120px)",
             }}
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
-                <div>
-                  <div className="mb-3">
-                    <h3 className="font-semibold text-gray-900">투자중인 존</h3>
+                {/* 투자중인 존 - 컴팩트 디자인 */}
+                <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-4 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                        <TrendingUp className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-blue-100 mb-0.5">투자중인 존 · 오늘</p>
+                        <h3 className="font-bold text-white">
+                          {account?.currentZone === 'interest' && '이자존'}
+                          {account?.currentZone === 'extreme' && '이자워크존'}
+                          {account?.currentZone === 'balance' && '파워워크존'}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-blue-100 mb-0.5">일 수익률</p>
+                      <p className="font-bold text-white">
+                        {account?.dailyReturnRate
+                          ? `+${(account.dailyReturnRate * 100).toFixed(2)}%`
+                          : '+0.00%'}
+                      </p>
+                    </div>
                   </div>
-                  <ZoneCard
-                    zone={account?.currentZone || "interest"}
-                    isActive={true}
-                    onClick={() => {}}
-                    isToday={true}
-                  />
                 </div>
 
-                <TomorrowZoneSelector
-                  tomorrowZone={account?.nextZone || "interest"}
-                  onZoneClick={handleTomorrowZoneClick}
-                  showRegionAlert={() => {
-                    setShowRegionAlert(true);
-                  }}
-                  hasRegionSelected={
-                    DEV_FORCE_ZONE_ENABLE ? true : (hasRegion || false)
-                  }
-                />
+                {/* 내일 투자할 존 카드 */}
+                <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden">
+                  {/* 내일 투자할 존 */}
+                  <div className="p-5 bg-gradient-to-br from-gray-50 to-white">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-semibold text-gray-700">
+                          🎯 내일 투자할 존
+                        </h3>
+                        <CountdownTimer />
+                      </div>
+                    </div>
+                    
+                    {!showAllZones ? (
+                      /* 축소된 뷰: 선택된 존만 표시 */
+                      <div className="space-y-3">
+                        <ZoneCard
+                          zone={account?.nextZone || "interest"}
+                          isActive={true}
+                          onClick={() => setShowAllZones(true)}
+                          isToday={false}
+                        />
+                        <button
+                          onClick={() => setShowAllZones(true)}
+                          className="w-full py-2.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
+                        >
+                          다른 존 선택하기
+                        </button>
+                      </div>
+                    ) : (
+                      /* 확장된 뷰: 모든 존 표시 */
+                      <div className="space-y-3">
+                        <TomorrowZoneSelector
+                          tomorrowZone={account?.nextZone || "interest"}
+                          onZoneClick={(zone) => {
+                            handleTomorrowZoneClick(zone);
+                            setShowAllZones(false);
+                          }}
+                          showRegionAlert={() => setShowRegionAlert(true)}
+                          hasRegionSelected={
+                            DEV_FORCE_ZONE_ENABLE
+                              ? true
+                              : hasRegion || false
+                          }
+                        />
+                        <button
+                          onClick={() => setShowAllZones(false)}
+                          className="w-full py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                        >
+                          접기
+                        </button>
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-gray-500 text-center mt-3">
+                      내일 00:00에 선택한 존으로 자동 전환됩니다
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-6">
                 <div className="bg-white rounded-2xl p-5 border border-gray-200">
-                  <h3 className="font-semibold text-gray-900 mb-4">빠른 메뉴</h3>
+                  <h3 className="font-semibold text-gray-900 mb-4">
+                    빠른 메뉴
+                  </h3>
                   <div className="space-y-2">
                     <button
                       onClick={() => navigate("/charge")}
@@ -328,8 +515,12 @@ export function MainApp() {
                         <Wallet className="w-5 h-5 text-green-600" />
                       </div>
                       <div className="flex-1 text-left">
-                        <p className="font-medium text-gray-900">충전하기</p>
-                        <p className="text-xs text-gray-600">JB 머니 충전</p>
+                        <p className="font-medium text-gray-900">
+                          충전하기
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          JB 머니 충전
+                        </p>
                       </div>
                     </button>
 
@@ -341,36 +532,49 @@ export function MainApp() {
                         <Bell className="w-5 h-5 text-blue-600" />
                       </div>
                       <div className="flex-1 text-left">
-                        <p className="font-medium text-gray-900">알림 설정</p>
-                        <p className="text-xs text-gray-600">투자 알림 관리</p>
+                        <p className="font-medium text-gray-900">
+                          알림 설정
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          투자 알림 관리
+                        </p>
                       </div>
                     </button>
                   </div>
                 </div>
 
                 <div className="bg-white rounded-2xl p-5 border border-gray-200">
-                  <h3 className="font-semibold text-gray-900 mb-4">계좌 정보</h3>
+                  <h3 className="font-semibold text-gray-900 mb-4">
+                    계좌 정보
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-gray-600">내일 투자할 존</p>
+                      <p className="text-sm text-gray-600">
+                        내일 투자할 존
+                      </p>
                       <p className="text-sm font-semibold text-gray-900">
                         {getZoneLabel(account?.nextZone)}
                       </p>
                     </div>
 
-                    {account?.nextZone === "extreme" && account?.extremeTheme && (
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600">선택한 테마</p>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {account.extremeTheme}
-                        </p>
-                      </div>
-                    )}
+                    {account?.nextZone === "extreme" &&
+                      account?.extremeTheme && (
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-gray-600">
+                            선택한 테마
+                          </p>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {account.extremeTheme}
+                          </p>
+                        </div>
+                      )}
 
                     {account?.nextZone === "balance" &&
                       account?.balanceRatio !== undefined && (
                         <div className="flex items-center justify-between">
-                          <p className="text-sm text-gray-600">투자 비율</p>
+                          <p className="text-sm text-gray-600">
+                            투자 비율
+                          </p>
                           <p className="text-sm font-semibold text-gray-900">
                             {account.balanceRatio}%
                           </p>
@@ -403,7 +607,7 @@ export function MainApp() {
                   지역 선택이 필요합니다
                 </h3>
                 <p className="text-sm text-gray-600 mb-6">
-                  익스트림존과 밸런스존을 이용하시려면
+                  이자워크존과 파워워크존을 이용하시려면
                   <br />
                   먼저 지역을 선택해주세요.
                 </p>
