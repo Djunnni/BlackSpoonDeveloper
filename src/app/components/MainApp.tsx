@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
-import { Bell, Wallet, AlertTriangle, TrendingUp, Landmark } from "lucide-react";
+import { Bell, Wallet, AlertTriangle, Shield, Landmark } from "lucide-react";
 import { ZoneCard } from "./ZoneCard";
 import { CountdownTimer } from "./CountdownTimer";
 import { TomorrowZoneSelector } from "./TomorrowZoneSelector";
@@ -416,8 +416,14 @@ export function MainApp() {
                 <div className="relative bg-white rounded-2xl p-5 border border-slate-200 shadow-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg shadow-sm">
-                        <TrendingUp className="w-5 h-5 text-white" />
+                      <div className={`bg-gradient-to-br p-2 rounded-lg shadow-sm ${
+                        account?.currentZone === 'interest' ? 'from-blue-500 to-blue-600' :
+                        account?.currentZone === 'extreme' ? 'from-orange-500 to-orange-600' :
+                        'from-purple-500 to-pink-500'
+                      }`}>
+                        {account?.currentZone === 'interest' && <Shield className="w-5 h-5 text-white" />}
+                        {account?.currentZone === 'extreme' && <Shield className="w-5 h-5 text-white" />}
+                        {account?.currentZone === 'balance' && <Shield className="w-5 h-5 text-white" />}
                       </div>
                       <div>
                         <p className="text-[10px] text-gray-500 mb-0.5">투자중인 존 · 오늘</p>

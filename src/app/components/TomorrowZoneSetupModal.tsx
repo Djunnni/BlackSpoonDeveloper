@@ -187,19 +187,23 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
   if (zone === "extreme") {
     return (
       <>
-        <Toaster position="bottom-center" toastOptions={{
-          duration: 2000,
-          style: {
-            background: '#fff',
-            color: '#1f2937',
-            borderRadius: '12px',
-            padding: '12px 20px',
-            fontSize: '14px',
-            fontWeight: '600',
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
-            border: '1px solid #f3f4f6',
-          },
-        }} />
+        <Toaster 
+          position="bottom-center" 
+          toastOptions={{
+            duration: 2000,
+            style: {
+              background: '#fff',
+              color: '#1f2937',
+              borderRadius: '12px',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: '600',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+              border: '1px solid #f3f4f6',
+              marginBottom: '100px', // 네이티브 탭바 위로 올리기
+            },
+          }} 
+        />
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
           {/* Header */}
@@ -382,19 +386,23 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
   // Balance Zone (파워워크존)
   return (
     <>
-      <Toaster position="bottom-center" toastOptions={{
-        duration: 2000,
-        style: {
-          background: '#fff',
-          color: '#1f2937',
-          borderRadius: '12px',
-          padding: '12px 20px',
-          fontSize: '14px',
-          fontWeight: '600',
-          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
-          border: '1px solid #f3f4f6',
-        },
-      }} />
+      <Toaster 
+        position="bottom-center" 
+        toastOptions={{
+          duration: 2000,
+          style: {
+            background: '#fff',
+            color: '#1f2937',
+            borderRadius: '12px',
+            padding: '12px 20px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+            border: '1px solid #f3f4f6',
+            marginBottom: '100px', // 네이티브 탭바 위로 올리기
+          },
+        }} 
+      />
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
         {/* Header */}
