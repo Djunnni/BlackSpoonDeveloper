@@ -279,7 +279,8 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                     
                     <button
                       onClick={() => {
-                        toast.success("AI 상담 기능은 준비 중입니다");
+                        toast.dismiss();
+                        toast.success("AI 상담 기능은 준비 중입니다", { id: 'ai-consult' });
                       }}
                       className="w-full p-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all shadow-md hover:shadow-lg"
                     >
@@ -338,7 +339,8 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                     key={theme.id}
                     onClick={() => {
                       setSelectedTheme(theme.id);
-                      toast.success(`${theme.icon} ${theme.name} 테마가 선택되었어요`);
+                      toast.dismiss();
+                      toast.success(`${theme.icon} ${theme.name} 테마가 선택되었어요`, { id: 'theme-select' });
                     }}
                     className={`p-3 sm:p-4 rounded-xl border-2 transition-all text-left ${
                       selectedTheme === theme.id
@@ -478,7 +480,8 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                   
                   <button
                     onClick={() => {
-                      toast.success("AI 상담 기능은 준비 중입니다");
+                      toast.dismiss();
+                      toast.success("AI 상담 기능은 준비 중입니다", { id: 'ai-consult' });
                     }}
                     className="w-full p-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-all shadow-md hover:shadow-lg"
                   >
@@ -574,7 +577,8 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                   key={theme.id}
                   onClick={() => {
                     setSelectedTheme(theme.id);
-                    toast.success(`${theme.icon} ${theme.name} 테마가 선택되었어요`);
+                    toast.dismiss();
+                    toast.success(`${theme.icon} ${theme.name} 테마가 선택되었어요`, { id: 'theme-select' });
                   }}
                   className={`p-3 sm:p-4 rounded-xl border-2 transition-all text-left ${
                     selectedTheme === theme.id
