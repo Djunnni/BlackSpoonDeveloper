@@ -237,9 +237,17 @@ export function MainApp() {
     
     // ✅ iOS에서 accessTokenInfo 메시지 받기
     if (payload?.type === "accessTokenInfo") {
+      console.log('[MainApp] accessTokenInfo detected');
+      console.log('[MainApp] payload.data:', payload.data);
+      console.log('[MainApp] Full payload:', payload);
+      
       // nativeBridge.ts의 전역 핸들러로 전달
       if ((window as any).handleAccessTokenInfo) {
-        (window as any).handleAccessTokenInfo(payload.data || payload);
+        // payload = { type: "accessTokenInfo", data: { accessToken: "..." } }
+        // → payload.data만 전달 = { accessToken: "..." }
+        (window as any).handleAccessTokenInfo(payload.data);
+      } else {
+        console.error('[MainApp] ❌ handleAccessTokenInfo not found!');
       }
       return;
     }
