@@ -243,13 +243,14 @@ export function MainApp() {
       console.log('[MainApp] payload.data:', payload.data);
       console.log('[MainApp] Full payload:', payload);
       
-      // nativeBridge.ts의 전역 핸들러로 전달
-      if ((window as any).handleAccessTokenInfo) {
+      // ✅ requestAccessToken()이 기다리는 window.tokenInfo 콜백 호출
+      if ((window as any).tokenInfo) {
+        console.log('[MainApp] ✅ Calling window.tokenInfo with payload.data');
         // payload = { type: "accessTokenInfo", data: { accessToken: "..." } }
         // → payload.data만 전달 = { accessToken: "..." }
-        (window as any).handleAccessTokenInfo(payload.data);
+        (window as any).tokenInfo(payload.data);
       } else {
-        console.error('[MainApp] ❌ handleAccessTokenInfo not found!');
+        console.warn('[MainApp] ⚠️ window.tokenInfo callback not found (maybe not waiting for token)');
       }
       return;
     }
