@@ -71,13 +71,20 @@ export function MainApp() {
   // ✅ 컴포넌트 마운트 시 계좌 정보 로드
   useEffect(() => {
     const loadInitialData = async () => {
-      const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false';
+      const localStorageValue = localStorage.getItem('VITE_USE_MOCK_API');
+      const USE_MOCK_API = localStorageValue !== null 
+        ? localStorageValue !== 'false' 
+        : import.meta.env.VITE_USE_MOCK_API !== 'false';
+      
+      console.log('[MainApp] 🔧 USE_MOCK_API:', USE_MOCK_API);
       
       if (USE_MOCK_API) {
         // Mock 모드: 기존 방식 사용
+        console.log('[MainApp] Using MOCK API mode');
         fetchAccount();
       } else {
         // 실제 API 모드: fetchUserFromApi/fetchAccountFromApi가 내부에서 accessToken 처리
+        console.log('[MainApp] Using REAL API mode - will call HTTP endpoint');
         try {
           console.log('[MainApp] Initial load: fetching from stores...');
           
@@ -159,14 +166,19 @@ export function MainApp() {
     console.log('[MainApp] 🔄 Starting refresh...');
     
     try {
-      const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false';
+      const localStorageValue = localStorage.getItem('VITE_USE_MOCK_API');
+      const USE_MOCK_API = localStorageValue !== null 
+        ? localStorageValue !== 'false' 
+        : import.meta.env.VITE_USE_MOCK_API !== 'false';
+      
+      console.log('[MainApp] 🔧 Refresh - USE_MOCK_API:', USE_MOCK_API);
       
       if (USE_MOCK_API) {
         console.log('[MainApp] Using Mock API');
         // Mock 모드
         await fetchAccount();
       } else {
-        console.log('[MainApp] Using Real API - fetching from stores...');
+        console.log('[MainApp] Using Real API - calling HTTP endpoint...');
         
         // ✅ 실제 API 호출: authStore와 accountStore가 각각 getUserInfo() 호출
         await Promise.all([

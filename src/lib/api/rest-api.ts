@@ -4,8 +4,14 @@ import { requestAccessToken, isNativeBridgeAvailable } from '../utils/native-bri
 // API 베이스 URL
 const API_BASE_URL = 'https://blackspoondev-sandbox.mxapps.io/rest/apiservice/v1';
 
-// 개발 모드 플래그 (환경변수나 설정으로 변경 가능)
-const DEV_MODE = import.meta.env.VITE_USE_MOCK_API !== 'false';
+// 개발 모드 플래그 (런타임에서 localStorage로 제어 가능)
+function isDevMode(): boolean {
+  const localStorageValue = localStorage.getItem('VITE_USE_MOCK_API');
+  if (localStorageValue !== null) {
+    return localStorageValue !== 'false';
+  }
+  return import.meta.env.VITE_USE_MOCK_API !== 'false';
+}
 
 // Native Bridge에서 accessToken 가져오기
 let cachedAccessToken: string | null = null;
@@ -48,7 +54,8 @@ export function clearAccessToken() {
  */
 export async function getUserInfo(): Promise<GetUserResponse> {
   // 개발 모드: Mock 데이터 반환
-  if (DEV_MODE) {
+  if (isDevMode()) {
+    console.log('[API] Using MOCK mode');
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
@@ -73,35 +80,88 @@ export async function getUserInfo(): Promise<GetUserResponse> {
     });
   }
 
-  try {
-    // Native Bridge에서 accessToken 가져오기
-    const accessToken = await getAccessTokenFromNative();
-    console.log('[API] Got accessToken from Native:', accessToken);
+  // 🧪 디버그 모드: localStorage에 DEBUG_ACCESS_TOKEN이 있으면 사용
+  let debugToken = localStorage.getItem('DEBUG_ACCESS_TOKEN');
+  
+  let accessToken: string;
+  
+  if (debugToken) {
+    console.log('🧪 [API] Using DEBUG_ACCESS_TOKEN from localStorage:', debugToken);
+    accessToken = debugToken;
+  } else {
+    // Native Bridge 사용 가능 여부 확인
+    if (!isNativeBridgeAvailable()) {
+      // Native Bridge가 없으면 자동으로 디버그 토큰 사용
+      const fallbackToken = '1068014311315';
+      console.warn('⚠️ [API] Native Bridge is not available');
+      console.warn('🧪 [API] Using FALLBACK DEBUG TOKEN:', fallbackToken);
+      console.warn('💡 [API] To use custom token: localStorage.setItem("DEBUG_ACCESS_TOKEN", "YOUR_TOKEN")');
+      
+      // 자동으로 localStorage에 저장
+      localStorage.setItem('DEBUG_ACCESS_TOKEN', fallbackToken);
+      accessToken = fallbackToken;
+    } else {
+      try {
+        // Native Bridge에서 accessToken 가져오기
+        console.log('[API] Requesting accessToken from Native Bridge...');
+        accessToken = await getAccessTokenFromNative();
+        console.log('[API] ✅ Got accessToken from Native:', accessToken);
+      } catch (error) {
+        console.error('❌ [API] Failed to get accessToken from Native:', error);
+        throw error;
+      }
+    }
+  }
 
+  try {
     // API 호출 - accessToken을 myBoxAccountNo로 사용
     const url = `${API_BASE_URL}/user?myBoxAccountNo=${encodeURIComponent(accessToken)}`;
-    console.log('[API] Calling:', url);
+    console.log('🌐 [API] 🚀 Calling HTTP GET:', url);
+    console.log('📡 [API] Check Network tab in DevTools!');
     
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      mode: 'cors', // CORS 명시적 설정
     });
 
-    console.log('[API] Response status:', response.status);
+    console.log('📥 [API] Response status:', response.status);
+    console.log('📥 [API] Response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[API] Error response:', errorText);
+      console.error('[API] ❌ Error response:', errorText);
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
     const data: GetUserResponse = await response.json();
-    console.log('[API] User data received:', data);
+    console.log('✅ [API] User data received:', data);
     return data;
   } catch (error) {
-    console.error('[API] getUserInfo failed:', error);
+    console.error('❌ [API] getUserInfo failed:', error);
+    
+    // 더 자세한 에러 정보
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.error('');
+      console.error('🔴 NETWORK ERROR DETAILS:');
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.error('This is likely a CORS error or network issue.');
+      console.error('');
+      console.error('Possible causes:');
+      console.error('  1. CORS: Server does not allow cross-origin requests');
+      console.error('  2. Network: Server is down or unreachable');
+      console.error('  3. URL: Invalid endpoint');
+      console.error('');
+      console.error('Check DevTools → Network tab for details:');
+      console.error(`  - Look for: ${API_BASE_URL}/user`);
+      console.error('  - Status: (failed) or (cors error)');
+      console.error('  - Response: empty or error message');
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.error('');
+    }
+    
     throw error;
   }
 }
