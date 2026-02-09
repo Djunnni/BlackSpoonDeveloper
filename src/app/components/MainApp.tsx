@@ -10,6 +10,7 @@ import { useAuthStore } from "../../lib/stores/authStore";
 import { useAccountStore } from "../../lib/stores/accountStore";
 import { DevToolsPanel } from "./DevToolsPanel";
 import { requestAccessToken } from "../../lib/utils/native-bridge";
+import.meta.env
 
 type Zone = "interest" | "extreme" | "balance";
 
