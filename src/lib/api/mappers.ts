@@ -86,8 +86,12 @@ export function mapApiResponseToUser(response: GetUserResponse): User {
 export function mapApiResponseToAccount(response: GetUserResponse): Account {
   const dto = response.UserInMyBoxDto;
   
-  // 계좌번호 포맷: 123-456-789012
-  const formattedAccountNo = dto.accountNo.replace(/(\d{3})(\d{3})(\d{6})/, '$1-$2-$3');
+  // 계좌번호 포맷: 123-456-789012 (13자리를 3-3-6 형식으로)
+  // 예: 1068011596267 -> 106-801-1596267
+  let formattedAccountNo = dto.accountNo;
+  if (dto.accountNo && dto.accountNo.length >= 12) {
+    formattedAccountNo = dto.accountNo.replace(/(\d{3})(\d{3})(\d+)/, '$1-$2-$3');
+  }
   
   return {
     accountId: `${dto.bankCode}-${dto.accountNo}`, // 은행코드-계좌번호 형식
@@ -95,7 +99,7 @@ export function mapApiResponseToAccount(response: GetUserResponse): Account {
     balance: dto.balance,
     investBalance: dto.investBalance,
     todayInterest: dto.todayInterestAmount,
-    todayProfit: dto.todayProfit, // String 그대로 사용
+    todayProfit: dto.todayProfit, // String 그대로 사용 (+8.50 형식)
     totalInterest: dto.todayInterestAmount, // API에 누적 이자가 없어서 임시로 오늘 이자 사용
     dailyReturnRate: 0, // 계산 필요
     currentZone: mapZoneType(dto.todayZoneType),
