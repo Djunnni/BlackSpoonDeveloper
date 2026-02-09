@@ -14,6 +14,7 @@ export interface Account {
   accountId: string;
   balance: number; // JB 머니 잔액
   todayInterest: number; // 오늘 발생한 이자
+  totalInterest: number; // 누적 발생 이자
   dailyReturnRate: number; // 일 단위 수익률
   currentZone: 'interest' | 'extreme' | 'balance'; // 오늘 투자중인 존
   nextZone: 'interest' | 'extreme' | 'balance'; // 내일 투자할 존
