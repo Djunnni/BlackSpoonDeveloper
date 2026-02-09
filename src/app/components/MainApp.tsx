@@ -307,7 +307,7 @@ export function MainApp() {
                 </div>
 
                 {/* 원금 & 이자 구분 - 애니메이션 */}
-                <div className="flex items-center gap-2" style={{ animationDelay: '0.2s' }}>
+                <div className="flex items-center gap-2 mb-2.5" style={{ animationDelay: '0.2s' }}>
                   {/* 원금 */}
                   <div className="flex-1 bg-gradient-to-br from-slate-800/80 to-slate-800/40 rounded-xl px-2.5 py-2 border border-slate-700/50 backdrop-blur-sm hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 animate-countUp">
                     <div className="flex items-center gap-1.5 mb-1">
@@ -329,6 +329,67 @@ export function MainApp() {
                     <div className="text-sm font-bold text-emerald-400 leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
                       +{(account?.totalInterest || 0).toLocaleString()}
                       <span className="text-[10px] text-emerald-300 ml-0.5 font-normal">원</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 투자 현황 - 오늘 */}
+                <div className="animate-countUp" style={{ animationDelay: '0.3s' }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className="w-1 h-1 bg-amber-400 rounded-full animate-pulse"></div>
+                    <span className="text-[9px] text-slate-500 font-semibold tracking-wide uppercase">Today Investment</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {/* 투자중인 존 */}
+                    <div className={`flex-1 bg-gradient-to-br rounded-xl px-2.5 py-2 border backdrop-blur-sm transition-all duration-300 ${
+                      account?.currentZone === 'interest' ? 'from-blue-900/40 to-blue-800/20 border-blue-500/30 hover:border-blue-400/50 hover:shadow-lg hover:shadow-blue-500/20' :
+                      account?.currentZone === 'extreme' ? 'from-orange-900/40 to-orange-800/20 border-orange-500/30 hover:border-orange-400/50 hover:shadow-lg hover:shadow-orange-500/20' :
+                      'from-purple-900/40 to-purple-800/20 border-purple-500/30 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/20'
+                    }`}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Shield className={`w-3 h-3 ${
+                          account?.currentZone === 'interest' ? 'text-blue-400' :
+                          account?.currentZone === 'extreme' ? 'text-orange-400' :
+                          'text-purple-400'
+                        }`} />
+                        <span className="text-[9px] text-slate-400 font-medium">운용존</span>
+                      </div>
+                      <div className={`text-xs font-bold leading-tight ${
+                        account?.currentZone === 'interest' ? 'text-blue-300' :
+                        account?.currentZone === 'extreme' ? 'text-orange-300' :
+                        'text-purple-300'
+                      }`}>
+                        {account?.currentZone === 'interest' && '이자존'}
+                        {account?.currentZone === 'extreme' && '이자워크존'}
+                        {account?.currentZone === 'balance' && '파워워크존'}
+                      </div>
+                    </div>
+
+                    {/* 투자 테마 (존이 extreme이나 balance일 때만) */}
+                    {(account?.currentZone === 'extreme' || account?.currentZone === 'balance') && account?.extremeTheme && (
+                      <div className="flex-1 bg-gradient-to-br from-indigo-900/40 to-indigo-800/20 rounded-xl px-2.5 py-2 border border-indigo-500/30 backdrop-blur-sm hover:border-indigo-400/50 hover:shadow-lg hover:shadow-indigo-500/20 transition-all duration-300">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <div className="w-3 h-3 text-indigo-400">✨</div>
+                          <span className="text-[9px] text-slate-400 font-medium">테마</span>
+                        </div>
+                        <div className="text-xs font-bold text-indigo-300 leading-tight truncate">
+                          {account.extremeTheme}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 일 수익률 */}
+                    <div className="flex-1 bg-gradient-to-br from-emerald-900/40 to-emerald-800/20 rounded-xl px-2.5 py-2 border border-emerald-500/30 backdrop-blur-sm hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                        <span className="text-[9px] text-slate-400 font-medium">일수익률</span>
+                      </div>
+                      <div className="text-xs font-bold text-emerald-400 leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {account?.dailyReturnRate
+                          ? `+${(account.dailyReturnRate * 100).toFixed(2)}%`
+                          : '+0.00%'}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -412,39 +473,6 @@ export function MainApp() {
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2 space-y-4">
-                {/* ☀️ 투자중인 존 */}
-                <div className="relative bg-white rounded-2xl p-5 border border-slate-200 shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`bg-gradient-to-br p-2 rounded-lg shadow-sm ${
-                        account?.currentZone === 'interest' ? 'from-blue-500 to-blue-600' :
-                        account?.currentZone === 'extreme' ? 'from-orange-500 to-orange-600' :
-                        'from-purple-500 to-pink-500'
-                      }`}>
-                        {account?.currentZone === 'interest' && <Shield className="w-5 h-5 text-white" />}
-                        {account?.currentZone === 'extreme' && <Shield className="w-5 h-5 text-white" />}
-                        {account?.currentZone === 'balance' && <Shield className="w-5 h-5 text-white" />}
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-gray-500 mb-0.5">투자중인 존 · 오늘</p>
-                        <h3 className="font-bold text-gray-900">
-                          {account?.currentZone === 'interest' && '이자존'}
-                          {account?.currentZone === 'extreme' && '이자워크존'}
-                          {account?.currentZone === 'balance' && '파워워크존'}
-                        </h3>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-gray-500 mb-0.5">일 수익률</p>
-                      <p className="font-bold text-emerald-600">
-                        {account?.dailyReturnRate
-                          ? `+${(account.dailyReturnRate * 100).toFixed(2)}%`
-                          : '+0.00%'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
                 {/* ☀️ 내일 투자할 존 */}
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
                   <div className="p-4">
