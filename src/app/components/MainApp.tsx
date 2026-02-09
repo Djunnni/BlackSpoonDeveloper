@@ -281,13 +281,41 @@ export function MainApp() {
                       </span>
                     </div>
                     
-                    {/* 테마 */}
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 rounded-full border border-orange-500/20">
-                      <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
-                      <span className="text-[10px] text-orange-400 font-medium">
-                        베터리 테마
-                      </span>
-                    </div>
+                    {/* 이자워크존 테마 */}
+                    {account?.currentZone === 'extreme' && account?.extremeTheme && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 rounded-full border border-orange-500/20">
+                        <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
+                        <span className="text-[10px] text-orange-400 font-medium">
+                          {account.extremeTheme}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* 파워워크존 투자 스타일 & 테마 */}
+                    {account?.currentZone === 'balance' && (
+                      <>
+                        {/* 투자 스타일 + 원금 비율 */}
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-500/10 rounded-full border border-purple-500/20">
+                          <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
+                          <span className="text-[10px] text-purple-400 font-medium">
+                            {account?.balanceRatio === 25 && '안정형'}
+                            {account?.balanceRatio === 50 && '균형형'}
+                            {account?.balanceRatio === 75 && '공격형'}
+                            {account?.balanceRatio && ` · 원금 ${account.balanceRatio}%`}
+                          </span>
+                        </div>
+                        
+                        {/* 선택한 테마 */}
+                        {account?.extremeTheme && (
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-500/10 rounded-full border border-purple-500/20">
+                            <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
+                            <span className="text-[10px] text-purple-400 font-medium">
+                              {account.extremeTheme}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
                 
@@ -451,6 +479,8 @@ export function MainApp() {
                             ? true
                             : hasRegion || false
                         }
+                        selectedTheme={account?.extremeTheme}
+                        selectedRatio={account?.balanceRatio}
                       />
                     </div>
                     

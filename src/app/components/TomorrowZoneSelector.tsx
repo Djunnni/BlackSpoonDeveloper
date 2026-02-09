@@ -8,6 +8,8 @@ interface TomorrowZoneSelectorProps {
   onZoneClick: (zone: Zone) => void;
   showRegionAlert: () => void;
   hasRegionSelected: boolean;
+  selectedTheme?: string;
+  selectedRatio?: number;
 }
 
 export function TomorrowZoneSelector({
@@ -15,6 +17,8 @@ export function TomorrowZoneSelector({
   onZoneClick,
   hasRegionSelected,
   showRegionAlert,
+  selectedTheme,
+  selectedRatio,
 }: TomorrowZoneSelectorProps) {
   return (
     <div>
@@ -80,6 +84,15 @@ export function TomorrowZoneSelector({
               <p className={`text-[10px] mt-1 ${hasRegionSelected ? 'text-red-600' : 'text-gray-400'}`}>
                 {hasRegionSelected ? "⚠️ 이자 손실 가능" : "🔒 지역 선택 필요"}
               </p>
+              
+              {/* 선택한 테마 표시 */}
+              {tomorrowZone === "extreme" && selectedTheme && (
+                <div className="mt-2 pt-2 border-t border-orange-200/50">
+                  <p className="text-[11px] text-orange-600 font-medium">
+                    선택한 테마: {selectedTheme}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </button>
@@ -118,6 +131,24 @@ export function TomorrowZoneSelector({
               <p className={`text-[10px] mt-1 ${hasRegionSelected ? 'text-orange-600' : 'text-gray-400'}`}>
                 {hasRegionSelected ? "⚠️ 원금 일부 손실 가능" : "🔒 지역 선택 필요"}
               </p>
+              
+              {/* 선택한 투자 스타일 & 테마 표시 */}
+              {tomorrowZone === "balance" && (selectedRatio || selectedTheme) && (
+                <div className="mt-2 pt-2 border-t border-purple-200/50 space-y-1">
+                  {selectedRatio && (
+                    <p className="text-[11px] text-purple-600 font-medium">
+                      선택한 투자: {selectedRatio === 25 && '안정형 원금 25%'}
+                      {selectedRatio === 50 && '균형형 원금 50%'}
+                      {selectedRatio === 75 && '공격형 원금 75%'}
+                    </p>
+                  )}
+                  {selectedTheme && (
+                    <p className="text-[11px] text-purple-600 font-medium">
+                      선택한 테마: {selectedTheme}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </button>
