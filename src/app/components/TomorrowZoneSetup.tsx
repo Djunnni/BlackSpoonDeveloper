@@ -66,7 +66,7 @@ export function TomorrowZoneSetup({ zone, onSave, onCancel }: TomorrowZoneSetupP
             >
               <ArrowLeft className="w-5 h-5 text-gray-900" />
             </button>
-            <h1 className="text-lg font-semibold text-gray-900">익스트림존 설정</h1>
+            <h1 className="text-lg font-semibold text-gray-900">이자워크존 설정</h1>
           </div>
         </div>
 
@@ -78,8 +78,8 @@ export function TomorrowZoneSetup({ zone, onSave, onCancel }: TomorrowZoneSetupP
                 <TrendingUp className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">익스트림존</h2>
-                <p className="text-sm text-orange-100">이자만으로 투자 · 고위험 고수익</p>
+                <h2 className="text-xl font-bold">이자워크존</h2>
+                <p className="text-sm text-orange-100">이자만으로 투자 · 중위험 중수익</p>
               </div>
             </div>
           </div>
@@ -121,7 +121,7 @@ export function TomorrowZoneSetup({ zone, onSave, onCancel }: TomorrowZoneSetupP
             onClick={handleSave}
             className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl"
           >
-            익스트림존으로 설정
+            이자워크존으로 설정
           </button>
         </div>
       </div>
@@ -140,7 +140,7 @@ export function TomorrowZoneSetup({ zone, onSave, onCancel }: TomorrowZoneSetupP
           >
             <ArrowLeft className="w-5 h-5 text-gray-900" />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900">밸런스존 설정</h1>
+          <h1 className="text-lg font-semibold text-gray-900">파워워크존 설정</h1>
         </div>
       </div>
 
@@ -152,15 +152,15 @@ export function TomorrowZoneSetup({ zone, onSave, onCancel }: TomorrowZoneSetupP
               <Scale className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">밸런스존</h2>
-              <p className="text-sm text-purple-100">원금 일부 투자 · 중위험 중수익</p>
+              <h2 className="text-xl font-bold">파워워크존</h2>
+              <p className="text-sm text-purple-100">원금 일부 투자 · 고위험 고수익</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-5 border border-gray-200">
           <h3 className="font-semibold text-gray-900 mb-1">투자 비율 선택</h3>
-          <p className="text-sm text-gray-600 mb-4">익스트림존과 이자존의 비율을 선택하세요</p>
+          <p className="text-sm text-gray-600 mb-4">이자워크존과 이자존의 비율을 선택하세요</p>
 
           <div className="space-y-3">
             {RATIO_OPTIONS.map((option) => (
@@ -217,7 +217,7 @@ export function TomorrowZoneSetup({ zone, onSave, onCancel }: TomorrowZoneSetupP
           onClick={handleSave}
           className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl"
         >
-          밸런스존으로 설정
+          파워워크존으로 설정
         </button>
       </div>
     </div>

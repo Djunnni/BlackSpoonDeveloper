@@ -209,9 +209,9 @@ export function MainApp() {
       )}
 
       {/* ✅ JB 머니(헤더) 고정 + 아래만 스크롤 */}
-      <div className="h-[100dvh] overflow-hidden flex flex-col bg-slate-950">
-        {/* ✅ 1) 고정 헤더 영역 - 프리미엄 다크 */}
-        <div className="shrink-0 bg-slate-950">
+      <div className="h-[100dvh] overflow-hidden flex flex-col bg-gradient-to-b from-slate-50 to-white">
+        {/* ✅ 1) 고정 헤더 영역 - 프리미엄 화이트 */}
+        <div className="shrink-0 bg-gradient-to-b from-slate-50 to-white">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-3">
             {/* Premium Vault Card */}
             <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-5 overflow-hidden shadow-2xl border border-slate-700/50 group">
@@ -384,9 +384,9 @@ export function MainApp() {
 
         </div>
 
-        {/* ✅ 2) 아래만 스크롤되는 영역 - 하얀색 반투명 배경 */}
+        {/* ✅ 2) 아래만 스크롤되는 영역 - 깔끔한 밝은 배경 */}
         <div
-          className="flex-1 min-h-0 overflow-y-auto bs-scroll bg-white/80 backdrop-blur-md"
+          className="flex-1 min-h-0 overflow-y-auto bs-scroll bg-gradient-to-b from-slate-50 to-white"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none", // Firefox 스크롤바 숨김
@@ -412,8 +412,8 @@ export function MainApp() {
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2 space-y-4">
-                {/* ☀️ 투자중인 존 - 밝은 태양 */}
-                <div className="relative bg-white rounded-xl p-4 border border-gray-200/80 shadow-sm">
+                {/* ☀️ 투자중인 존 */}
+                <div className="relative bg-white rounded-2xl p-5 border border-slate-200 shadow-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-lg shadow-sm">
@@ -439,8 +439,8 @@ export function MainApp() {
                   </div>
                 </div>
 
-                {/* ☀️ 내일 투자할 존 - 밝은 태양 */}
-                <div className="bg-white rounded-xl border border-gray-200/80 overflow-hidden shadow-sm">
+                {/* ☀️ 내일 투자할 존 */}
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -501,7 +501,7 @@ export function MainApp() {
 
               <div className="space-y-4">
                 {/* ☀️ 빠른 메뉴 */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200/80 shadow-sm">
+                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-lg">
                   <h3 className="font-semibold text-gray-900 mb-3 text-sm">
                     빠른 메뉴
                   </h3>
@@ -543,7 +543,7 @@ export function MainApp() {
                 </div>
 
                 {/* ☀️ 계좌 정보 */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200/80 shadow-sm">
+                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-lg">
                   <h3 className="font-semibold text-gray-900 mb-3 text-sm">
                     계좌 정보
                   </h3>

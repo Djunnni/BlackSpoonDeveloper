@@ -89,13 +89,13 @@ export function TomorrowZoneSelector({
                 <h3
                   className={`font-semibold ${hasRegionSelected ? "text-gray-900" : "text-gray-400"}`}
                 >
-                  익스트림존
+                  이자워크존
                 </h3>
                 <div className="flex items-center gap-1">
                   <span
                     className={`text-xs font-medium px-2 py-0.5 rounded ${hasRegionSelected ? "text-orange-600 bg-orange-100" : "text-gray-400 bg-gray-200"}`}
                   >
-                    위험도 5
+                    위험도 3
                   </span>
                 </div>
               </div>
@@ -150,13 +150,13 @@ export function TomorrowZoneSelector({
                 <h3
                   className={`font-semibold ${hasRegionSelected ? "text-gray-900" : "text-gray-400"}`}
                 >
-                  밸런스존
+                  파워워크존
                 </h3>
                 <div className="flex items-center gap-1">
                   <span
                     className={`text-xs font-medium px-2 py-0.5 rounded ${hasRegionSelected ? "text-purple-600 bg-purple-100" : "text-gray-400 bg-gray-200"}`}
                   >
-                    위험도 3
+                    위험도 5
                   </span>
                 </div>
               </div>

@@ -194,8 +194,8 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
                 <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">익스트림존 설정</h2>
-                <p className="text-xs sm:text-sm text-gray-600">이자만으로 투자 · 고위험 고수익</p>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">이자워크존 설정</h2>
+                <p className="text-xs sm:text-sm text-gray-600">이자만으로 투자 · 중위험 중수익</p>
               </div>
             </div>
             <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -309,7 +309,7 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
               onClick={handleSave}
               className="flex-1 py-3 px-4 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl text-sm sm:text-base"
             >
-              익스트림존으로 설정
+              이자워크존으로 설정
             </button>
           </div>
         </div>
@@ -328,8 +328,8 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
               <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">밸런스존 설정</h2>
-              <p className="text-xs sm:text-sm text-gray-600">원금 일부 투자 · 중위험 중수익</p>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900">파워워크존 설정</h2>
+              <p className="text-xs sm:text-sm text-gray-600">원금 일부 투자 · 고위험 고수익</p>
             </div>
           </div>
           <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -485,7 +485,7 @@ export function TomorrowZoneSetupModal({ zone, onSave, onCancel }: TomorrowZoneS
             onClick={handleSave}
             className="flex-1 py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-sm sm:text-base"
           >
-            밸런스존으로 설정
+            파워워크존으로 설정
           </button>
         </div>
       </div>
