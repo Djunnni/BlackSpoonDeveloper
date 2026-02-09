@@ -384,9 +384,9 @@ export function MainApp() {
 
         </div>
 
-        {/* ✅ 2) 아래만 스크롤되는 영역 - 은은한 반투명 배경 */}
+        {/* ✅ 2) 아래만 스크롤되는 영역 - 하얀색 반투명 배경 */}
         <div
-          className="flex-1 min-h-0 overflow-y-auto bs-scroll bg-white/5 backdrop-blur-sm"
+          className="flex-1 min-h-0 overflow-y-auto bs-scroll bg-white/80 backdrop-blur-md"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none", // Firefox 스크롤바 숨김
