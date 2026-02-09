@@ -31,39 +31,9 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-inset-bottom">
-        <div className="max-w-screen-xl mx-auto px-4">
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => handleTabChange("home")}
-              className={`flex flex-col items-center py-3 px-2 transition-colors ${
-                currentTab === "home" ? "text-blue-600" : "text-gray-400"
-              }`}
-            >
-              <Home className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium">홈</span>
-            </button>
-            <button
-              onClick={() => handleTabChange("analysis")}
-              className={`flex flex-col items-center py-3 px-2 transition-colors ${
-                currentTab === "analysis" ? "text-blue-600" : "text-gray-400"
-              }`}
-            >
-              <BarChart3 className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium">분석</span>
-            </button>
-            <button
-              onClick={() => handleTabChange("settings")}
-              className={`flex flex-col items-center py-3 px-2 transition-colors ${
-                currentTab === "settings" ? "text-blue-600" : "text-gray-400"
-              }`}
-            >
-              <Settings className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium">설정</span>
-            </button>
-          </div>
-        </div>
+      {/* Bottom Navigation - 탭바 영역 유지 (앱에서 네이티브 탭바 사용) */}
+      <div className="fixed bottom-0 left-0 right-0 safe-area-inset-bottom" style={{ height: 'env(safe-area-inset-bottom)' }}>
+        {/* 탭바 UI는 숨김 처리 - 영역만 유지 */}
       </div>
     </div>
   );
