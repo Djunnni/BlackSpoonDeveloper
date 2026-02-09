@@ -7,9 +7,10 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK_API !== 'false';
 
 // Mock 계좌 데이터
 const mockAccount: Account = {
-  accountId: 'account-1',
+  accountId: '123-456-789012',
   balance: 15750000,
   todayInterest: 329,
+  totalInterest: 0,
   dailyReturnRate: 0.0033,
   currentZone: 'interest',
   nextZone: 'interest',

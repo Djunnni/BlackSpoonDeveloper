@@ -268,6 +268,9 @@ export function MainApp() {
                     </div>
                     <div>
                       <div className="text-sm font-bold text-amber-400">JB 머니</div>
+                      <div className="text-sm text-slate-300 font-bold mt-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {account?.accountId || '123-456-789012'}
+                      </div>
                     </div>
                   </div>
                   
