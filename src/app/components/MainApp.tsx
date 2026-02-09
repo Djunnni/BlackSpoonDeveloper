@@ -271,12 +271,23 @@ export function MainApp() {
                     </div>
                   </div>
                   
-                  {/* 지역 */}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/60 rounded-full border border-slate-700/50">
-                    <div className="w-1 h-1 bg-emerald-400 rounded-full"></div>
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      {user?.regionName || "전북 전주시 덕진구"}
-                    </span>
+                  {/* 지역 & 테마 */}
+                  <div className="flex flex-col gap-1.5">
+                    {/* 지역 */}
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/60 rounded-full border border-slate-700/50">
+                      <div className="w-1 h-1 bg-emerald-400 rounded-full"></div>
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {user?.regionName || "전북 전주시 덕진구"}
+                      </span>
+                    </div>
+                    
+                    {/* 테마 */}
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 rounded-full border border-orange-500/20">
+                      <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
+                      <span className="text-[10px] text-orange-400 font-medium">
+                        베터리 테마
+                      </span>
+                    </div>
                   </div>
                 </div>
                 
@@ -427,46 +438,21 @@ export function MainApp() {
                       </div>
                     </div>
                     
-                    {!showAllZones ? (
-                      /* 축소된 뷰: 선택된 존만 표시 */
-                      <div className="space-y-3">
-                        <ZoneCard
-                          zone={account?.nextZone || "interest"}
-                          isActive={true}
-                          onClick={() => setShowAllZones(true)}
-                          isToday={false}
-                        />
-                        <button
-                          onClick={() => setShowAllZones(true)}
-                          className="w-full py-2.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
-                        >
-                          다른 존 선택하기
-                        </button>
-                      </div>
-                    ) : (
-                      /* 확장된 뷰: 모든 존 표시 */
-                      <div className="space-y-3">
-                        <TomorrowZoneSelector
-                          tomorrowZone={account?.nextZone || "interest"}
-                          onZoneClick={(zone) => {
-                            handleTomorrowZoneClick(zone);
-                            setShowAllZones(false);
-                          }}
-                          showRegionAlert={() => setShowRegionAlert(true)}
-                          hasRegionSelected={
-                            DEV_FORCE_ZONE_ENABLE
-                              ? true
-                              : hasRegion || false
-                          }
-                        />
-                        <button
-                          onClick={() => setShowAllZones(false)}
-                          className="w-full py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-                        >
-                          접기
-                        </button>
-                      </div>
-                    )}
+                    {/* 항상 모든 존 표시 */}
+                    <div className="space-y-3">
+                      <TomorrowZoneSelector
+                        tomorrowZone={account?.nextZone || "interest"}
+                        onZoneClick={(zone) => {
+                          handleTomorrowZoneClick(zone);
+                        }}
+                        showRegionAlert={() => setShowRegionAlert(true)}
+                        hasRegionSelected={
+                          DEV_FORCE_ZONE_ENABLE
+                            ? true
+                            : hasRegion || false
+                        }
+                      />
+                    </div>
                     
                     <p className="text-[10px] text-gray-500 text-center mt-3">
                       내일 00:00에 선택한 존으로 자동 전환됩니다
