@@ -60,6 +60,40 @@ export const NativeBridge = {
     postToNative(payload);
   },
 
+  // ✅ AccessToken 요청 (Promise 반환)
+  requestAccessToken(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const callbackId = "tokenInfo";
+      const timeout = 5000;
+
+      // 타임아웃 설정
+      const timeoutId = setTimeout(() => {
+        delete (window as any)[callbackId];
+        reject(new Error("AccessToken request timeout"));
+      }, timeout);
+
+      // 콜백 등록
+      (window as any)[callbackId] = (data: any) => {
+        clearTimeout(timeoutId);
+        delete (window as any)[callbackId];
+        
+        if (data && data.accessToken) {
+          resolve(data.accessToken);
+        } else {
+          reject(new Error("Invalid accessToken response"));
+        }
+      };
+
+      // Native에 요청 전송
+      const payload: NativeMessage = {
+        type: "accessTokenInfo",
+        callbackId: callbackId,
+        ts: Date.now(),
+      };
+      postToNative(payload);
+    });
+  },
+
   // ✅ Settings Bottom 숨김 요청
   hideSettingBottom(message?: string) {
     const payload: NativeMessage = {
