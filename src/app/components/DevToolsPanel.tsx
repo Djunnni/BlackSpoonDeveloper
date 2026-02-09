@@ -1,12 +1,21 @@
-import { useState } from 'react';
-import { Settings, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, X, Check, AlertCircle, Clock } from 'lucide-react';
 import { isNativeBridgeAvailable, detectPlatform, requestAccessToken } from '../../lib/utils/native-bridge';
+
+type NativeBridgeLog = {
+  id: number;
+  timestamp: string;
+  type: 'request' | 'response' | 'error';
+  message: string;
+  data?: any;
+};
 
 /**
  * 개발자 도구 패널
  * - Mock/Real API 모드 전환
  * - 계좌번호 설정
  * - Native Bridge 테스트
+ * - Native Bridge 로그 확인
  */
 export function DevToolsPanel() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,10 +23,47 @@ export function DevToolsPanel() {
     import.meta.env.VITE_MYBOX_ACCOUNT_NO || '1068011596267'
   );
   const [selectedScenario, setSelectedScenario] = useState('default');
+  const [logs, setLogs] = useState<NativeBridgeLog[]>([]);
+  const [lastToken, setLastToken] = useState<string | null>(null);
 
   const useMockApi = import.meta.env.VITE_USE_MOCK_API !== 'false';
   const nativeBridgeAvailable = isNativeBridgeAvailable();
   const platform = detectPlatform();
+
+  // ✅ Native Bridge 메시지 수신 로깅
+  useEffect(() => {
+    const originalReceive = (window as any).BlackSpoonDevNativeReceive;
+    
+    (window as any).BlackSpoonDevNativeReceive = (payload: any) => {
+      // 로그 추가
+      addLog('response', `수신: ${payload?.type || 'unknown'}`, payload);
+      
+      // AccessToken 저장
+      if (payload?.type === 'accessTokenInfo' && payload?.data?.accessToken) {
+        setLastToken(payload.data.accessToken);
+      }
+      
+      // 원래 함수 호출
+      if (originalReceive) {
+        originalReceive(payload);
+      }
+    };
+
+    return () => {
+      (window as any).BlackSpoonDevNativeReceive = originalReceive;
+    };
+  }, []);
+
+  const addLog = (type: 'request' | 'response' | 'error', message: string, data?: any) => {
+    const newLog: NativeBridgeLog = {
+      id: Date.now(),
+      timestamp: new Date().toLocaleTimeString('ko-KR'),
+      type,
+      message,
+      data,
+    };
+    setLogs(prev => [newLog, ...prev].slice(0, 20)); // 최근 20개만 유지
+  };
 
   const scenarios = [
     { id: 'default', name: '기본 (이자존)', zone: 'INTEREST' },
@@ -39,11 +85,13 @@ export function DevToolsPanel() {
   };
 
   const handleTestNativeBridge = async () => {
+    addLog('request', 'AccessToken 요청 중...', { type: 'accessTokenInfo' });
     console.log('🔔 Testing Native Bridge...');
     console.log('Platform:', platform);
     console.log('Available:', nativeBridgeAvailable);
 
     if (!nativeBridgeAvailable) {
+      addLog('error', 'Native Bridge 사용 불가', { reason: '네이티브 앱에서 실행 필요' });
       alert('❌ Native Bridge를 사용할 수 없습니다. 네이티브 앱에서 실행하세요.');
       return;
     }
@@ -51,9 +99,12 @@ export function DevToolsPanel() {
     try {
       const token = await requestAccessToken();
       console.log('✅ AccessToken received:', token);
+      setLastToken(token);
+      addLog('response', '✅ AccessToken 수신 성공', { tokenLength: token.length });
       alert(`✅ AccessToken 수신 성공!\n\n${token.substring(0, 50)}...`);
     } catch (error: any) {
       console.error('❌ AccessToken request failed:', error);
+      addLog('error', `AccessToken 요청 실패: ${error.message}`, { error: error.message });
       alert(`❌ AccessToken 요청 실패:\n${error.message}`);
     }
   };
@@ -139,6 +190,64 @@ export function DevToolsPanel() {
             🔗 AccessToken 테스트
           </button>
         </div>
+
+        {/* ✅ 최근 수신한 토큰 */}
+        {lastToken && (
+          <div className="bg-slate-800 rounded-lg p-3 border border-slate-700">
+            <div className="flex items-center gap-2 mb-2">
+              <Check className="w-4 h-4 text-green-400" />
+              <span className="text-xs font-bold text-green-400">최근 수신 토큰</span>
+            </div>
+            <div className="text-[10px] text-slate-300 break-all font-mono bg-slate-900 p-2 rounded">
+              {lastToken.length > 100 ? `${lastToken.substring(0, 100)}...` : lastToken}
+            </div>
+            <div className="text-[9px] text-slate-500 mt-1">
+              길이: {lastToken.length} 자
+            </div>
+          </div>
+        )}
+
+        {/* ✅ Native Bridge 로그 */}
+        {logs.length > 0 && (
+          <div className="bg-slate-800 rounded-lg p-3 border border-slate-700">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-slate-300">📝 Native Bridge 로그</span>
+              <button
+                onClick={() => setLogs([])}
+                className="text-[10px] text-slate-400 hover:text-white"
+              >
+                지우기
+              </button>
+            </div>
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {logs.map(log => (
+                <div key={log.id} className="text-[10px] bg-slate-900 rounded p-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    {log.type === 'request' && <Clock className="w-3 h-3 text-blue-400" />}
+                    {log.type === 'response' && <Check className="w-3 h-3 text-green-400" />}
+                    {log.type === 'error' && <AlertCircle className="w-3 h-3 text-red-400" />}
+                    <span className={`font-bold ${
+                      log.type === 'request' ? 'text-blue-400' :
+                      log.type === 'response' ? 'text-green-400' :
+                      'text-red-400'
+                    }`}>
+                      {log.timestamp}
+                    </span>
+                  </div>
+                  <div className="text-slate-300">{log.message}</div>
+                  {log.data && (
+                    <details className="mt-1">
+                      <summary className="text-slate-500 cursor-pointer hover:text-slate-400">상세</summary>
+                      <pre className="text-[9px] text-slate-400 mt-1 overflow-x-auto">
+                        {JSON.stringify(log.data, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Mock 시나리오 선택 */}
         {useMockApi && (

@@ -56,18 +56,25 @@ let tokenPromiseRejector: ((error: Error) => void) | null = null;
 // ✅ iOS에서 accessTokenInfo 메시지를 받을 전역 핸들러
 if (typeof window !== "undefined") {
   (window as any).handleAccessTokenInfo = (data: any) => {
-    console.log('[NativeBridge] Received accessTokenInfo:', data);
+    console.log('[NativeBridge] handleAccessTokenInfo called with:', data);
     
     if (tokenPromiseResolver) {
-      if (data && data.accessToken) {
-        tokenPromiseResolver(data.accessToken);
+      // iOS 응답 형태: { accessToken: "..." } 또는 { data: { accessToken: "..." } }
+      const token = data?.accessToken || data?.data?.accessToken;
+      
+      if (token) {
+        console.log('[NativeBridge] ✅ Token resolved:', token);
+        tokenPromiseResolver(token);
         tokenPromiseResolver = null;
         tokenPromiseRejector = null;
       } else if (tokenPromiseRejector) {
+        console.error('[NativeBridge] ❌ Invalid token data:', data);
         tokenPromiseRejector(new Error("Invalid accessToken response"));
         tokenPromiseResolver = null;
         tokenPromiseRejector = null;
       }
+    } else {
+      console.warn('[NativeBridge] ⚠️ No resolver waiting for token');
     }
   };
 }
