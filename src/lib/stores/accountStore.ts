@@ -31,7 +31,7 @@ interface AccountState {
 
   // 액션
   fetchAccount: () => Promise<void>;
-  fetchAccountFromApi: (accountNo: string) => Promise<void>;
+  fetchAccountFromApi: () => Promise<void>;
   selectZone: (data: SelectZoneRequest) => Promise<void>;
   clearError: () => void;
 }
@@ -67,18 +67,23 @@ export const useAccountStore = create<AccountState>((set) => ({
     }
   },
 
-  // REST API로 계좌 정보 가져오기
-  fetchAccountFromApi: async (accountNo: string) => {
+  // REST API로 계좌 정보 가져오기 (accessToken은 getUserInfo 내부에서 자동으로 받음)
+  fetchAccountFromApi: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await getUserInfo(accountNo);
+      console.log('[accountStore] Fetching account info from API...');
+      const response = await getUserInfo();
+      console.log('[accountStore] API response:', response);
+      
       const account = mapApiResponseToAccount(response);
+      console.log('[accountStore] Mapped account:', account);
       
       set({
         account,
         isLoading: false,
       });
     } catch (error: any) {
+      console.error('[accountStore] fetchAccountFromApi failed:', error);
       set({
         error: error.message || '계좌 정보를 불러오는데 실패했습니다.',
         isLoading: false,

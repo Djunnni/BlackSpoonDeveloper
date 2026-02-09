@@ -34,7 +34,7 @@ interface AuthState {
   clearError: () => void;
   updateUser: (user: User) => void;
   // REST API로 사용자 정보 가져오기
-  fetchUserFromApi: (accountNo: string) => Promise<void>;
+  fetchUserFromApi: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -154,12 +154,16 @@ export const useAuthStore = create<AuthState>()(
         set({ user });
       },
 
-      // REST API로 사용자 정보 가져오기
-      fetchUserFromApi: async (accountNo: string) => {
+      // REST API로 사용자 정보 가져오기 (accessToken은 getUserInfo 내부에서 자동으로 받음)
+      fetchUserFromApi: async () => {
         set({ isLoading: true, error: null });
         try {
-          const response = await getUserInfo(accountNo);
+          console.log('[authStore] Fetching user info from API...');
+          const response = await getUserInfo();
+          console.log('[authStore] API response:', response);
+          
           const user = mapApiResponseToUser(response);
+          console.log('[authStore] Mapped user:', user);
           
           set({
             user,
@@ -167,6 +171,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         } catch (error: any) {
+          console.error('[authStore] fetchUserFromApi failed:', error);
           set({
             error: error.message || '사용자 정보를 불러오는데 실패했습니다.',
             isLoading: false,

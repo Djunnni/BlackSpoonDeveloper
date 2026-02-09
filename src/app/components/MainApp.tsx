@@ -77,20 +77,20 @@ export function MainApp() {
         // Mock 모드: 기존 방식 사용
         fetchAccount();
       } else {
-        // 실제 API 모드: Native Bridge로 accessToken 요청 후 REST API 호출
-        const accountNo = import.meta.env.VITE_MYBOX_ACCOUNT_NO || '1068011596267';
-        
+        // 실제 API 모드: fetchUserFromApi/fetchAccountFromApi가 내부에서 accessToken 처리
         try {
-          // 1. accessToken 요청 (Native Bridge)
-          await requestAccessToken();
+          console.log('[MainApp] Initial load: fetching from stores...');
           
-          // 2. 사용자 정보와 계좌 정보를 동시에 가져오기
+          // 사용자 정보와 계좌 정보를 동시에 가져오기
+          // (각 store의 fetch 함수가 내부에서 getUserInfo() 호출 → accessToken 자동 요청)
           await Promise.all([
-            fetchUserFromApi(accountNo),
-            fetchAccountFromApi(accountNo),
+            fetchUserFromApi(),
+            fetchAccountFromApi(),
           ]);
+          
+          console.log('[MainApp] Initial data loaded successfully');
         } catch (error) {
-          console.error('Failed to load user data from API:', error);
+          console.error('[MainApp] Failed to load user data from API:', error);
           // 에러 발생 시 Mock 데이터로 폴백
           fetchAccount();
         }
@@ -166,15 +166,15 @@ export function MainApp() {
         // Mock 모드
         await fetchAccount();
       } else {
-        console.log('[MainApp] Using Real API - calling getUserInfo()');
+        console.log('[MainApp] Using Real API - fetching from stores...');
         
-        // 실제 API 호출: getUserInfo()가 내부에서 accessToken을 받아서 /user 호출
-        const userData = await getUserInfo();
-        console.log('[MainApp] ✅ User data received:', userData);
+        // ✅ 실제 API 호출: authStore와 accountStore가 각각 getUserInfo() 호출
+        await Promise.all([
+          fetchUserFromApi(),
+          fetchAccountFromApi(),
+        ]);
         
-        // TODO: userData를 authStore와 accountStore에 반영
-        // 지금은 일단 로그만 출력
-        alert(`✅ API 호출 성공!\n이름: ${userData.name}\n잔액: ${userData.UserInMyBoxDto.balance.toLocaleString()}원`);
+        console.log('[MainApp] ✅ Data updated in stores');
       }
     } catch (error) {
       console.error('[MainApp] ❌ Failed to refresh data:', error);
@@ -185,7 +185,7 @@ export function MainApp() {
       setIsRefreshing(false);
       setPullDistance(0);
     }
-  }, [isRefreshing, fetchAccount]);
+  }, [isRefreshing, fetchAccount, fetchUserFromApi, fetchAccountFromApi]);
 
   // Pull-to-Refresh: 터치 이벤트 핸들러
   const handleTouchStart = (e: React.TouchEvent) => {
