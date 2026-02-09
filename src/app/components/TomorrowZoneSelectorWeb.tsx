@@ -8,6 +8,8 @@ interface TomorrowZoneSelectorProps {
   onZoneClick: (zone: Zone) => void;
   showRegionAlert: () => void;
   hasRegionSelected: boolean;
+  selectedTheme?: string;
+  selectedRatio?: number;
 }
 
 export function TomorrowZoneSelector({
@@ -15,6 +17,8 @@ export function TomorrowZoneSelector({
   onZoneClick,
   hasRegionSelected,
   showRegionAlert,
+  selectedTheme,
+  selectedRatio,
 }: TomorrowZoneSelectorProps) {
   return (
     <div>
@@ -111,12 +115,11 @@ export function TomorrowZoneSelector({
                   ? "⚠️ 이자 손실 가능"
                   : "🔒 지역 선택 필요"}
               </p>
-              {tomorrowZone === "extreme" &&
-                hasRegionSelected && (
-                  <p className="text-xs text-orange-600 mt-1">
-                    테마: 미국 테크 선택됨
-                  </p>
-                )}
+              {tomorrowZone === "extreme" && selectedTheme && (
+                <p className="text-xs text-orange-600 mt-1 font-medium">
+                  선택한 테마: {selectedTheme}
+                </p>
+              )}
             </div>
           </div>
         </button>
@@ -150,7 +153,7 @@ export function TomorrowZoneSelector({
                 <h3
                   className={`font-semibold ${hasRegionSelected ? "text-gray-900" : "text-gray-400"}`}
                 >
-                  파워워크존
+                  파워워크존{selectedRatio ? ` ${selectedRatio}%` : ''}
                 </h3>
                 <div className="flex items-center gap-1">
                   <span
@@ -172,11 +175,21 @@ export function TomorrowZoneSelector({
                   ? "⚠️ 원금 일부 손실 가능"
                   : "🔒 지역 선택 필요"}
               </p>
-              {tomorrowZone === "balance" &&
-                hasRegionSelected && (
-                  <p className="text-xs text-purple-600 mt-1">
-                    안정형 (25% / 75%) 선택됨
-                  </p>
+              {tomorrowZone === "balance" && (selectedRatio || selectedTheme) && (
+                <div className="mt-1 space-y-0.5">
+                  {selectedRatio && (
+                    <p className="text-xs text-purple-600 font-medium">
+                      {selectedRatio === 25 && '안정형 원금 25%'}
+                      {selectedRatio === 50 && '균형형 원금 50%'}
+                      {selectedRatio === 75 && '공격형 원금 75%'}
+                    </p>
+                  )}
+                  {selectedTheme && (
+                    <p className="text-xs text-purple-600 font-medium">
+                      선택한 테마: {selectedTheme}
+                    </p>
+                  )}
+                </div>
                 )}
             </div>
           </div>

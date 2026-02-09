@@ -1,20 +1,22 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./Layout";
-import { Bell, Wallet, AlertTriangle, Shield, Landmark } from "lucide-react";
+import { Bell, Wallet, AlertTriangle, Shield, Landmark, RefreshCw } from "lucide-react";
 import { ZoneCard } from "./ZoneCard";
 import { CountdownTimer } from "./CountdownTimer";
 import { TomorrowZoneSelector } from "./TomorrowZoneSelector";
 import { TomorrowZoneSetupModal } from "./TomorrowZoneSetupModal";
 import { useAuthStore } from "../../lib/stores/authStore";
 import { useAccountStore } from "../../lib/stores/accountStore";
+import { DevToolsPanel } from "./DevToolsPanel";
+import { requestAccessToken } from "../../lib/utils/native-bridge";
 
 type Zone = "interest" | "extreme" | "balance";
 
 export function MainApp() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
-  const { account, fetchAccount, selectZone, isLoading } =
+  const { user, fetchUserFromApi } = useAuthStore();
+  const { account, fetchAccount, fetchAccountFromApi, selectZone, isLoading } =
     useAccountStore();
 
   const [showTomorrowZoneSetup, setShowTomorrowZoneSetup] =
@@ -24,6 +26,12 @@ export function MainApp() {
   >("extreme");
   const [showRegionAlert, setShowRegionAlert] = useState(false);
   const [showAllZones, setShowAllZones] = useState(false);
+  
+  // Pull-to-Refresh 상태
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const touchStartY = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // ✅ 개발 중 강제 활성화 (이거 true면 지역 없어도 밸런스/익스트림 무조건 열린다)
   const DEV_FORCE_ZONE_ENABLE = true;
@@ -61,8 +69,35 @@ export function MainApp() {
 
   // ✅ 컴포넌트 마운트 시 계좌 정보 로드
   useEffect(() => {
-    fetchAccount();
-  }, [fetchAccount]);
+    const loadInitialData = async () => {
+      const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false';
+      
+      if (USE_MOCK_API) {
+        // Mock 모드: 기존 방식 사용
+        fetchAccount();
+      } else {
+        // 실제 API 모드: Native Bridge로 accessToken 요청 후 REST API 호출
+        const accountNo = import.meta.env.VITE_MYBOX_ACCOUNT_NO || '1068011596267';
+        
+        try {
+          // 1. accessToken 요청 (Native Bridge)
+          await requestAccessToken();
+          
+          // 2. 사용자 정보와 계좌 정보를 동시에 가져오기
+          await Promise.all([
+            fetchUserFromApi(accountNo),
+            fetchAccountFromApi(accountNo),
+          ]);
+        } catch (error) {
+          console.error('Failed to load user data from API:', error);
+          // 에러 발생 시 Mock 데이터로 폴백
+          fetchAccount();
+        }
+      }
+    };
+    
+    loadInitialData();
+  }, [fetchAccount, fetchUserFromApi, fetchAccountFromApi]);
 
   // ✅ 원래 지역 판단
   const realHasRegion = !!(
@@ -72,61 +107,6 @@ export function MainApp() {
   // ✅ 최종: 개발용 강제 활성화 or 임시 활성화가 켜져 있으면 true
   const hasRegion =
     realHasRegion || tempHasRegion || DEV_FORCE_ZONE_ENABLE;
-
-  // ✅ (옵션) 네이티브 regionSelected 이벤트도 같이 받기
-  const onNativeRegionSelected = useCallback((payload: any) => {
-    if (payload?.type === "regionSelected") {
-      setTempHasRegion(false);
-      setShowRegionAlert(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const onMessage = (e: MessageEvent) => {
-      try {
-        const data =
-          typeof e.data === "string"
-            ? JSON.parse(e.data)
-            : e.data;
-        onNativeRegionSelected(data);
-      } catch {
-        onNativeRegionSelected(e.data);
-      }
-    };
-
-    const onCustom = (e: Event) => {
-      const ce = e as CustomEvent;
-      onNativeRegionSelected(ce.detail);
-    };
-
-    window.addEventListener("message", onMessage);
-    window.addEventListener(
-      "BlackSpoonDevNative",
-      onCustom as any,
-    );
-
-    (window as any).BlackSpoonDevWeb =
-      (window as any).BlackSpoonDevWeb || {};
-    (window as any).BlackSpoonDevWeb.onNativeMessage = (
-      p: any,
-    ) => {
-      onNativeRegionSelected(p);
-    };
-
-    return () => {
-      window.removeEventListener("message", onMessage);
-      window.removeEventListener(
-        "BlackSpoonDevNative",
-        onCustom as any,
-      );
-      try {
-        if ((window as any).BlackSpoonDevWeb?.onNativeMessage) {
-          delete (window as any).BlackSpoonDevWeb
-            .onNativeMessage;
-        }
-      } catch {}
-    };
-  }, [onNativeRegionSelected]);
 
   const handleTomorrowZoneClick = (zone: Zone) => {
     if (zone === "interest") {
@@ -170,10 +150,160 @@ export function MainApp() {
     }
   };
 
-  const getZoneLabel = (zone?: Zone) => {
+  // Pull-to-Refresh: 새로고침 로직
+  const handleRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+    
+    setIsRefreshing(true);
+    
+    try {
+      const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false';
+      
+      if (USE_MOCK_API) {
+        // Mock 모드
+        await fetchAccount();
+      } else {
+        // 실제 API 모드: Native Bridge로 accessToken 요청
+        const accountNo = import.meta.env.VITE_MYBOX_ACCOUNT_NO || '1068011596267';
+        
+        // accessToken 요청 (Native Bridge)
+        await requestAccessToken();
+        
+        // 사용자 정보와 계좌 정보를 동시에 가져오기
+        await Promise.all([
+          fetchUserFromApi(accountNo),
+          fetchAccountFromApi(accountNo),
+        ]);
+      }
+    } catch (error) {
+      console.error('Failed to refresh data:', error);
+      // 에러 발생 시 Mock 데이터로 폴백
+      await fetchAccount();
+    } finally {
+      setIsRefreshing(false);
+      setPullDistance(0);
+    }
+  }, [isRefreshing, fetchAccount, fetchUserFromApi, fetchAccountFromApi]);
+
+  // Pull-to-Refresh: 터치 이벤트 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    // 스크롤이 최상단일 때만 활성화
+    if (container.scrollTop === 0) {
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const container = scrollContainerRef.current;
+    if (!container || isRefreshing) return;
+    
+    // 스크롤이 최상단일 때만 작동
+    if (container.scrollTop === 0 && touchStartY.current > 0) {
+      const touchY = e.touches[0].clientY;
+      const distance = touchY - touchStartY.current;
+      
+      // 아래로 당길 때만 (distance > 0)
+      if (distance > 0) {
+        // 최대 80px까지만 당기기
+        setPullDistance(Math.min(distance, 80));
+        
+        // 브라우저 기본 당기기 동작 방지
+        if (distance > 10) {
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isRefreshing) return;
+    
+    // 60px 이상 당기면 새로고침 트리거
+    if (pullDistance >= 60) {
+      handleRefresh();
+    } else {
+      setPullDistance(0);
+    }
+    
+    touchStartY.current = 0;
+  };
+
+  // ✅ 네이티브 메시지 핸들러
+  const onNativeMessage = useCallback((payload: any) => {
+    // 지역 선택 이벤트
+    if (payload?.type === "regionSelected") {
+      setTempHasRegion(false);
+      setShowRegionAlert(false);
+    }
+    
+    // 홈 새로고침 이벤트
+    if (payload?.type === "refreshHome") {
+      handleRefresh();
+    }
+  }, [handleRefresh]);
+
+  // ✅ Native Bridge 메시지 리스너 등록
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      try {
+        const data =
+          typeof e.data === "string"
+            ? JSON.parse(e.data)
+            : e.data;
+        onNativeMessage(data);
+      } catch {
+        onNativeMessage(e.data);
+      }
+    };
+
+    const onCustom = (e: Event) => {
+      const ce = e as CustomEvent;
+      onNativeMessage(ce.detail);
+    };
+
+    window.addEventListener("message", onMessage);
+    window.addEventListener(
+      "BlackSpoonDevNative",
+      onCustom as any,
+    );
+
+    (window as any).BlackSpoonDevWeb =
+      (window as any).BlackSpoonDevWeb || {};
+    (window as any).BlackSpoonDevWeb.onNativeMessage = (
+      p: any,
+    ) => {
+      onNativeMessage(p);
+    };
+
+    return () => {
+      window.removeEventListener("message", onMessage);
+      window.removeEventListener(
+        "BlackSpoonDevNative",
+        onCustom as any,
+      );
+      try {
+        if ((window as any).BlackSpoonDevWeb?.onNativeMessage) {
+          delete (window as any).BlackSpoonDevWeb
+            .onNativeMessage;
+        }
+      } catch {}
+    };
+  }, [onNativeMessage]);
+
+  const getZoneLabel = (zone?: Zone, isForTomorrow?: boolean) => {
     if (zone === "interest") return "이자존";
     if (zone === "extreme") return "이자워크존";
-    if (zone === "balance") return "파워워크존";
+    if (zone === "balance") {
+      // 내일 투자 존인 경우 nextBalanceRatio 사용
+      const ratio = isForTomorrow ? account?.nextBalanceRatio : account?.currentBalanceRatio;
+      if (ratio) {
+        return `파워워크존 ${ratio}%`;
+      }
+      return "파워워크존";
+    }
     return "이자존";
   };
 
@@ -261,15 +391,15 @@ export function MainApp() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2.5">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl blur-md opacity-70"></div>
-                      <div className="relative bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-2.5 rounded-xl shadow-lg">
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl blur-md opacity-70 animate-pulse"></div>
+                      <div className="relative bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-2.5 rounded-xl shadow-lg animate-float">
                         <Landmark className="w-5 h-5 text-slate-900 stroke-[2.5]" />
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-amber-400">JB 머니</div>
+                      <div className="text-base font-bold text-amber-400">JB 머니</div>
                       <div className="text-sm text-slate-300 font-bold mt-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {account?.accountId || '123-456-789012'}
+                        {account?.accountNo || '106-801-159626'}
                       </div>
                     </div>
                   </div>
@@ -278,8 +408,8 @@ export function MainApp() {
                   <div className="flex flex-col gap-1.5">
                     {/* 지역 */}
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/60 rounded-full border border-slate-700/50">
-                      <div className="w-1 h-1 bg-emerald-400 rounded-full"></div>
-                      <span className="text-[10px] text-slate-400 font-medium">
+                      <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                      <span className="text-[11px] text-slate-300 font-semibold">
                         {user?.regionName || "전북 전주시 덕진구"}
                       </span>
                     </div>
@@ -301,10 +431,10 @@ export function MainApp() {
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-500/10 rounded-full border border-purple-500/20">
                           <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
                           <span className="text-[10px] text-purple-400 font-medium">
-                            {account?.balanceRatio === 25 && '안정형'}
-                            {account?.balanceRatio === 50 && '균형형'}
-                            {account?.balanceRatio === 75 && '공격형'}
-                            {account?.balanceRatio && ` · 원금 ${account.balanceRatio}%`}
+                            {account?.currentBalanceRatio === 25 && '안정형'}
+                            {account?.currentBalanceRatio === 50 && '균형형'}
+                            {account?.currentBalanceRatio === 75 && '공격형'}
+                            {account?.currentBalanceRatio && ` · 원금 ${account.currentBalanceRatio}%`}
                           </span>
                         </div>
                         
@@ -324,55 +454,57 @@ export function MainApp() {
                 
                 {/* 총 자산 & 일 수익률 */}
                 <div className="mb-4">
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <h1 className="text-[28px] font-bold text-white tracking-tight leading-none" style={{ 
-                      textShadow: '0 0 20px rgba(251, 191, 36, 0.3)',
-                      fontVariantNumeric: 'tabular-nums'
+                  <div className="flex items-baseline gap-2.5 mb-2">
+                    <h1 className="text-[32px] font-bold text-white tracking-tight leading-none" style={{ 
+                      textShadow: '0 0 20px rgba(251, 191, 36, 0.35)',
+                      fontVariantNumeric: 'tabular-nums',
+                      letterSpacing: '-0.02em'
                     }}>
-                      {(86800000).toLocaleString()}
-                      <span className="text-base text-slate-400 ml-1 font-normal">원</span>
+                      {((account?.balance || 0) + (account?.investBalance || 0)).toLocaleString()}
+                      <span className="text-base text-slate-400 ml-1.5 font-normal">원</span>
                     </h1>
                     
                     <span className="text-base font-bold text-emerald-400 shrink-0" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                      +8.50%
+                      {account?.todayProfit || '+0.00'}%
                     </span>
                   </div>
                   
                   {/* 수익금 */}
                   <div className="text-base font-bold text-emerald-400" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    +{(6800000).toLocaleString()}원
+                    +{(account?.investBalance || 0).toLocaleString()}원
                   </div>
                 </div>
 
                 {/* 투자 현황 */}
-                <div className="bg-gradient-to-br from-slate-800/40 to-slate-800/20 rounded-2xl px-4 py-3 border border-slate-700/30">
+                <div className="bg-gradient-to-br from-slate-800/40 to-slate-800/20 rounded-2xl px-5 py-4 border border-slate-700/30">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <Shield className={`w-4 h-4 ${
+                    <div className="flex items-center gap-3">
+                      <Shield className={`w-5 h-5 ${
                         account?.currentZone === 'interest' ? 'text-blue-400' :
                         account?.currentZone === 'extreme' ? 'text-orange-400' :
                         'text-purple-400'
                       }`} />
                       <div>
-                        <div className={`text-sm font-bold ${
+                        <div className={`text-base font-bold ${
                           account?.currentZone === 'interest' ? 'text-blue-300' :
                           account?.currentZone === 'extreme' ? 'text-orange-300' :
                           'text-purple-300'
                         }`}>
                           {account?.currentZone === 'interest' && '이자존'}
                           {account?.currentZone === 'extreme' && '이자워크존'}
-                          {account?.currentZone === 'balance' && '파워워크존'}
+                          {account?.currentZone === 'balance' && account?.currentBalanceRatio && `파워워크존 ${account.currentBalanceRatio}%`}
+                          {account?.currentZone === 'balance' && !account?.currentBalanceRatio && '파워워크존'}
                         </div>
                         {(account?.currentZone === 'extreme' || account?.currentZone === 'balance') && account?.extremeTheme && (
-                          <div className="text-[11px] text-slate-400 mt-0.5">{account.extremeTheme}</div>
+                          <div className="text-xs text-slate-400 mt-0.5">{account.extremeTheme}</div>
                         )}
                       </div>
                     </div>
                     
                     <div className="text-right">
-                      <div className="text-[10px] text-slate-500 mb-0.5">원금</div>
-                      <div className="text-xs font-semibold text-slate-300" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {(80000000).toLocaleString()}
+                      <div className="text-[11px] text-slate-400 mb-0.5 font-medium">원금</div>
+                      <div className="text-sm font-bold text-slate-200" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {(account?.balance || 0).toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -431,13 +563,45 @@ export function MainApp() {
 
         {/* ✅ 2) 아래만 스크롤되는 영역 - 깔끔한 밝은 배경 */}
         <div
-          className="flex-1 min-h-0 overflow-y-auto bs-scroll bg-gradient-to-b from-slate-50 to-white"
+          ref={scrollContainerRef}
+          className="flex-1 min-h-0 overflow-y-auto bs-scroll bg-gradient-to-b from-slate-50 to-white relative"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none", // Firefox 스크롤바 숨김
             msOverflowStyle: "none", // IE/Old Edge 스크롤바 숨김
           }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
+          {/* Pull-to-Refresh 인디케이터 */}
+          <div 
+            className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all duration-200 ease-out z-50"
+            style={{
+              height: pullDistance,
+              opacity: pullDistance > 0 ? 1 : 0,
+            }}
+          >
+            <div className={`flex flex-col items-center ${isRefreshing ? 'animate-pulse' : ''}`}>
+              <div 
+                className={`bg-gradient-to-br from-amber-400 to-amber-600 rounded-full p-2 shadow-lg ${
+                  isRefreshing ? 'animate-spin' : ''
+                }`}
+                style={{
+                  transform: `rotate(${pullDistance * 3}deg)`,
+                }}
+              >
+                <RefreshCw className="w-4 h-4 text-slate-900" />
+              </div>
+              {pullDistance >= 60 && !isRefreshing && (
+                <span className="text-xs text-slate-600 mt-1 font-medium">놓아서 새로고침</span>
+              )}
+              {isRefreshing && (
+                <span className="text-xs text-slate-600 mt-1 font-medium">새로고침 중...</span>
+              )}
+            </div>
+          </div>
+
           {/* WebKit(iOS/사파리/크롬) 스크롤바 숨김 */}
           <style>{`
             .bs-scroll::-webkit-scrollbar {
@@ -483,7 +647,7 @@ export function MainApp() {
                             : hasRegion || false
                         }
                         selectedTheme={account?.extremeTheme}
-                        selectedRatio={account?.balanceRatio}
+                        selectedRatio={account?.nextBalanceRatio}
                       />
                     </div>
                     
@@ -548,7 +712,7 @@ export function MainApp() {
                         내일 투자할 존
                       </p>
                       <p className="text-sm font-semibold text-gray-900">
-                        {getZoneLabel(account?.nextZone)}
+                        {getZoneLabel(account?.nextZone, true)}
                       </p>
                     </div>
 
@@ -565,13 +729,13 @@ export function MainApp() {
                       )}
 
                     {account?.nextZone === "balance" &&
-                      account?.balanceRatio !== undefined && (
+                      account?.nextBalanceRatio !== undefined && (
                         <div className="flex items-center justify-between p-2.5 rounded-lg bg-purple-50 border border-purple-200/50">
                           <p className="text-xs text-gray-600">
                             투자 비율
                           </p>
                           <p className="text-sm font-semibold text-purple-600">
-                            {account.balanceRatio}%
+                            {account.nextBalanceRatio}%
                           </p>
                         </div>
                       )}
@@ -628,6 +792,9 @@ export function MainApp() {
           </div>
         )}
       </div>
+
+      {/* 개발자 도구 패널 */}
+      <DevToolsPanel />
     </Layout>
   );
 }

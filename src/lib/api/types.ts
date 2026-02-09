@@ -12,14 +12,19 @@ export interface User {
 // 계좌 정보
 export interface Account {
   accountId: string;
+  accountNo: string; // 계좌번호 (123-456-789012 형식)
   balance: number; // JB 머니 잔액
+  investBalance: number; // 투자 중인 금액
   todayInterest: number; // 오늘 발생한 이자
+  todayProfit: string; // 오늘 수익 (String, +8.50 형식)
   totalInterest: number; // 누적 발생 이자
   dailyReturnRate: number; // 일 단위 수익률
   currentZone: 'interest' | 'extreme' | 'balance'; // 오늘 투자중인 존
   nextZone: 'interest' | 'extreme' | 'balance'; // 내일 투자할 존
   extremeTheme?: string; // 익스트림존 선택 테마
   balanceRatio?: number; // 밸런스존 비율 (25, 50, 75)
+  currentBalanceRatio?: number; // 오늘의 파워워크존 비율
+  nextBalanceRatio?: number; // 내일의 파워워크존 비율
 }
 
 // 투자 내역

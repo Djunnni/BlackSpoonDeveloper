@@ -2,14 +2,17 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '../api/types';
 import { authApi } from '../api/services';
+import { getUserInfo } from '../api/rest-api';
+import { mapApiResponseToUser } from '../api/mappers';
 
 // Mock 사용자 데이터
 const mockUser: User = {
   id: 'user-1',
-  name: '홍길동',
+  name: '이동준',
   email: 'user@example.com',
-  phoneNumber: '010-1234-5678',
-  regionCode: '110000',
+  phoneNumber: '010-1234-1234',
+  regionCode: '35510',
+  regionName: '전북 전주시 덕진구',
   createdAt: '2026-01-01T00:00:00Z',
 };
 
@@ -30,6 +33,8 @@ interface AuthState {
   checkAuth: () => Promise<void>;
   clearError: () => void;
   updateUser: (user: User) => void;
+  // REST API로 사용자 정보 가져오기
+  fetchUserFromApi: (accountNo: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -147,6 +152,27 @@ export const useAuthStore = create<AuthState>()(
       // 사용자 정보 업데이트 (지역 선택 등)
       updateUser: (user: User) => {
         set({ user });
+      },
+
+      // REST API로 사용자 정보 가져오기
+      fetchUserFromApi: async (accountNo: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await getUserInfo(accountNo);
+          const user = mapApiResponseToUser(response);
+          
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error: any) {
+          set({
+            error: error.message || '사용자 정보를 불러오는데 실패했습니다.',
+            isLoading: false,
+          });
+          throw error;
+        }
       },
     }),
     {

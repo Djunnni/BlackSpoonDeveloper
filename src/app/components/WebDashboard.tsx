@@ -33,6 +33,8 @@ export function WebDashboard() {
   const [tomorrowZone, setTomorrowZone] = useState<Zone>('interest');
   const [showTomorrowZoneSetup, setShowTomorrowZoneSetup] = useState(false);
   const [setupZoneType, setSetupZoneType] = useState<'extreme' | 'balance'>('extreme');
+  const [selectedTheme, setSelectedTheme] = useState<string>();
+  const [selectedRatio, setSelectedRatio] = useState<number>();
 
   const handleTomorrowZoneClick = (zone: Zone) => {
     if (zone === 'interest') {
@@ -151,6 +153,10 @@ export function WebDashboard() {
               <TomorrowZoneSelectorWeb 
                 tomorrowZone={tomorrowZone}
                 onZoneClick={handleTomorrowZoneClick}
+                showRegionAlert={() => {}}
+                hasRegionSelected={true}
+                selectedTheme={selectedTheme}
+                selectedRatio={selectedRatio}
               />
             </div>
 

@@ -1,19 +1,26 @@
 import { create } from 'zustand';
 import type { Account, SelectZoneRequest } from '../api/types';
 import { accountApi } from '../api/services';
+import { getUserInfo } from '../api/rest-api';
+import { mapApiResponseToAccount } from '../api/mappers';
 
 // 개발 중에는 기본적으로 Mock 모드 사용
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_API !== 'false';
 
 // Mock 계좌 데이터
 const mockAccount: Account = {
-  accountId: '123-456-789012',
-  balance: 15750000,
+  accountId: '037-1068011596267',
+  accountNo: '106-801-159626',
+  balance: 80000000,
+  investBalance: 6800000,
   todayInterest: 329,
+  todayProfit: '+8.50',
   totalInterest: 0,
   dailyReturnRate: 0.0033,
   currentZone: 'interest',
   nextZone: 'interest',
+  currentBalanceRatio: undefined,
+  nextBalanceRatio: undefined,
 };
 
 interface AccountState {
@@ -24,6 +31,7 @@ interface AccountState {
 
   // 액션
   fetchAccount: () => Promise<void>;
+  fetchAccountFromApi: (accountNo: string) => Promise<void>;
   selectZone: (data: SelectZoneRequest) => Promise<void>;
   clearError: () => void;
 }
@@ -56,6 +64,26 @@ export const useAccountStore = create<AccountState>((set) => ({
       });
       // 에러를 던지지 않고 기본값 설정
       console.error('Failed to fetch account:', error);
+    }
+  },
+
+  // REST API로 계좌 정보 가져오기
+  fetchAccountFromApi: async (accountNo: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await getUserInfo(accountNo);
+      const account = mapApiResponseToAccount(response);
+      
+      set({
+        account,
+        isLoading: false,
+      });
+    } catch (error: any) {
+      set({
+        error: error.message || '계좌 정보를 불러오는데 실패했습니다.',
+        isLoading: false,
+      });
+      throw error;
     }
   },
 

@@ -120,7 +120,9 @@ export function TomorrowZoneSelector({
             </div>
             <div className="flex-1 text-left">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className={`font-semibold ${tomorrowZone === "balance" ? 'text-purple-600' : hasRegionSelected ? 'text-gray-700' : 'text-gray-500'}`}>파워워크존</h3>
+                <h3 className={`font-semibold ${tomorrowZone === "balance" ? 'text-purple-600' : hasRegionSelected ? 'text-gray-700' : 'text-gray-500'}`}>
+                  파워워크존{selectedRatio ? ` ${selectedRatio}%` : ''}
+                </h3>
                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded ${tomorrowZone === "balance" ? 'text-purple-600 bg-purple-100' : hasRegionSelected ? 'text-gray-500 bg-gray-200' : 'text-gray-400 bg-gray-200'}`}>
                   위험도 5
                 </span>
