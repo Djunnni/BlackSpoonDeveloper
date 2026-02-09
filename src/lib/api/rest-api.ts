@@ -44,9 +44,9 @@ export function clearAccessToken() {
 
 /**
  * GET /user - 사용자 정보 조회
- * @param myBoxAccountNo - 계좌번호 (숫자)
+ * accessToken을 Native Bridge에서 받아서 myBoxAccountNo 파라미터로 사용
  */
-export async function getUserInfo(myBoxAccountNo: string): Promise<GetUserResponse> {
+export async function getUserInfo(): Promise<GetUserResponse> {
   // 개발 모드: Mock 데이터 반환
   if (DEV_MODE) {
     return new Promise((resolve) => {
@@ -76,25 +76,32 @@ export async function getUserInfo(myBoxAccountNo: string): Promise<GetUserRespon
   try {
     // Native Bridge에서 accessToken 가져오기
     const accessToken = await getAccessTokenFromNative();
+    console.log('[API] Got accessToken from Native:', accessToken);
 
-    // API 호출
-    const url = `${API_BASE_URL}/user?myBoxAccountNo=${encodeURIComponent(myBoxAccountNo)}`;
+    // API 호출 - accessToken을 myBoxAccountNo로 사용
+    const url = `${API_BASE_URL}/user?myBoxAccountNo=${encodeURIComponent(accessToken)}`;
+    console.log('[API] Calling:', url);
+    
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
       },
     });
 
+    console.log('[API] Response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[API] Error response:', errorText);
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
     const data: GetUserResponse = await response.json();
+    console.log('[API] User data received:', data);
     return data;
   } catch (error) {
-    console.error('getUserInfo failed:', error);
+    console.error('[API] getUserInfo failed:', error);
     throw error;
   }
 }

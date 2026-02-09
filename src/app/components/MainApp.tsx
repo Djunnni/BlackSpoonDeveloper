@@ -10,6 +10,7 @@ import { useAuthStore } from "../../lib/stores/authStore";
 import { useAccountStore } from "../../lib/stores/accountStore";
 import { DevToolsPanel } from "./DevToolsPanel";
 import { requestAccessToken } from "../../lib/utils/native-bridge";
+import { getUserInfo } from "../../lib/api/rest-api";
 
 type Zone = "interest" | "extreme" | "balance";
 
@@ -155,35 +156,36 @@ export function MainApp() {
     if (isRefreshing) return;
     
     setIsRefreshing(true);
+    console.log('[MainApp] 🔄 Starting refresh...');
     
     try {
       const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== 'false';
       
       if (USE_MOCK_API) {
+        console.log('[MainApp] Using Mock API');
         // Mock 모드
         await fetchAccount();
       } else {
-        // 실제 API 모드: Native Bridge로 accessToken 요청
-        const accountNo = import.meta.env.VITE_MYBOX_ACCOUNT_NO || '1068011596267';
+        console.log('[MainApp] Using Real API - calling getUserInfo()');
         
-        // accessToken 요청 (Native Bridge)
-        await requestAccessToken();
+        // 실제 API 호출: getUserInfo()가 내부에서 accessToken을 받아서 /user 호출
+        const userData = await getUserInfo();
+        console.log('[MainApp] ✅ User data received:', userData);
         
-        // 사용자 정보와 계좌 정보를 동시에 가져오기
-        await Promise.all([
-          fetchUserFromApi(accountNo),
-          fetchAccountFromApi(accountNo),
-        ]);
+        // TODO: userData를 authStore와 accountStore에 반영
+        // 지금은 일단 로그만 출력
+        alert(`✅ API 호출 성공!\n이름: ${userData.name}\n잔액: ${userData.UserInMyBoxDto.balance.toLocaleString()}원`);
       }
     } catch (error) {
-      console.error('Failed to refresh data:', error);
+      console.error('[MainApp] ❌ Failed to refresh data:', error);
+      alert(`❌ API 호출 실패: ${error instanceof Error ? error.message : String(error)}`);
       // 에러 발생 시 Mock 데이터로 폴백
       await fetchAccount();
     } finally {
       setIsRefreshing(false);
       setPullDistance(0);
     }
-  }, [isRefreshing, fetchAccount, fetchUserFromApi, fetchAccountFromApi]);
+  }, [isRefreshing, fetchAccount]);
 
   // Pull-to-Refresh: 터치 이벤트 핸들러
   const handleTouchStart = (e: React.TouchEvent) => {
