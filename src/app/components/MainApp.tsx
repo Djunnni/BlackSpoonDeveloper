@@ -209,92 +209,128 @@ export function MainApp() {
       )}
 
       {/* ✅ JB 머니(헤더) 고정 + 아래만 스크롤 */}
-      <div className="h-[100dvh] overflow-hidden flex flex-col bg-gradient-to-b from-slate-50 to-white">
-        {/* ✅ 1) 고정 헤더 영역 - 어두운 달 */}
-        <div className="shrink-0 bg-gradient-to-b from-indigo-950 via-indigo-900 to-indigo-800">
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4">
-            {/* 🌙 Moon Card - Premium Dark */}
-            <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl p-5 overflow-hidden border border-white/10 shadow-2xl">
-              {/* 달빛 효과 */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-blue-400/10 rounded-full blur-3xl"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-400/10 rounded-full blur-2xl"></div>
+      <div className="h-[100dvh] overflow-hidden flex flex-col bg-slate-950">
+        {/* ✅ 1) 고정 헤더 영역 - 프리미엄 다크 */}
+        <div className="shrink-0 bg-slate-950">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-3">
+            {/* Premium Vault Card */}
+            <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-5 overflow-hidden shadow-2xl border border-slate-700/50 group">
+              {/* 배경 패턴 */}
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+                  backgroundSize: '32px 32px'
+                }}></div>
+              </div>
+              
+              {/* 금빛 그라데이션 효과 - 애니메이션 */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
+              
+              {/* 반짝이는 라인 효과 */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent animate-shimmer"></div>
+              </div>
               
               <style>{`
+                @keyframes shimmer {
+                  0% { transform: translateX(-100%); }
+                  100% { transform: translateX(100%); }
+                }
                 @keyframes countUp {
                   from { opacity: 0; transform: translateY(10px); }
                   to { opacity: 1; transform: translateY(0); }
                 }
+                @keyframes float {
+                  0%, 100% { transform: translateY(0px); }
+                  50% { transform: translateY(-5px); }
+                }
+                .animate-shimmer {
+                  animation: shimmer 3s infinite;
+                }
                 .animate-countUp {
                   animation: countUp 0.6s ease-out forwards;
+                }
+                .animate-float {
+                  animation: float 3s ease-in-out infinite;
                 }
               `}</style>
               
               <div className="relative z-10">
-                {/* 상단: 금고 + 지역 */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="bg-gradient-to-br from-amber-400 to-amber-500 p-2 rounded-lg shadow-lg">
-                      <Vault className="w-5 h-5 text-indigo-950" />
+                {/* 상단: 금고 헤더 + 지역 + 테마 */}
+                <div className="flex items-start justify-between mb-3.5">
+                  {/* 왼쪽: 금고 아이콘 + 타이틀 */}
+                  <div className="flex items-center gap-2.5 animate-countUp">
+                    <div className="relative animate-float">
+                      <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg blur-md opacity-70 animate-pulse"></div>
+                      <div className="relative bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-2 rounded-lg shadow-lg">
+                        <Vault className="w-5 h-5 text-slate-900" />
+                      </div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-indigo-300/60 leading-tight">이자불림금고</div>
-                      <div className="text-sm font-bold text-amber-400 leading-tight">JB 머니</div>
+                      <div className="text-[10px] text-slate-500 leading-tight">이자불림금고</div>
+                      <div className="text-sm font-bold bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent leading-tight">JB 머니</div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-full border border-white/10 backdrop-blur-sm">
-                    <div className="w-1 h-1 bg-emerald-400 rounded-full"></div>
-                    <span className="text-[10px] text-indigo-200/80 font-medium">
-                      {user?.regionName || "전북특별자치도 전주시 덕진구"}
-                    </span>
+                  {/* 오른쪽: 지역 + 테마 정보 */}
+                  <div className="flex flex-col items-end gap-1.5">
+                    {/* 지역 정보 */}
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/60 rounded-full border border-slate-700/50 backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300">
+                      <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse"></div>
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {user?.regionName || "전북특별자치도 전주시 덕진구"}
+                      </span>
+                    </div>
+
+                    {/* 선택한 테마 */}
+                    {account?.nextZone === "extreme" && account?.extremeTheme && (
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-900/40 rounded-full border border-purple-500/30 backdrop-blur-sm hover:border-purple-400/50 transition-all duration-300">
+                        <div className="w-1 h-1 bg-purple-400 rounded-full animate-pulse"></div>
+                        <span className="text-[10px] text-purple-300 font-medium">
+                          {account.extremeTheme}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 
-                {/* 총 자산 */}
-                <div className="mb-4 animate-countUp">
-                  <h1 className="text-[36px] font-bold text-white tracking-tight leading-none" style={{ 
+                {/* 총 자산 - 애니메이션 */}
+                <div className="mb-3.5 animate-countUp" style={{ animationDelay: '0.1s' }}>
+                  <h1 className="text-[32px] font-bold text-white tracking-tight leading-none transition-all duration-300 hover:text-amber-100" style={{ 
+                    textShadow: '0 0 20px rgba(251, 191, 36, 0.3)',
                     fontVariantNumeric: 'tabular-nums'
                   }}>
                     {(account?.balance || 0).toLocaleString()}
-                    <span className="text-lg text-indigo-200/60 ml-2 font-normal">원</span>
+                    <span className="text-lg text-slate-400 ml-1.5 font-normal">원</span>
                   </h1>
                 </div>
 
-                {/* 원금 & 이자 */}
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-white/5 rounded-xl px-3 py-2 border border-white/10 backdrop-blur-sm">
+                {/* 원금 & 이자 구분 - 애니메이션 */}
+                <div className="flex items-center gap-2" style={{ animationDelay: '0.2s' }}>
+                  {/* 원금 */}
+                  <div className="flex-1 bg-gradient-to-br from-slate-800/80 to-slate-800/40 rounded-xl px-2.5 py-2 border border-slate-700/50 backdrop-blur-sm hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 animate-countUp">
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                      <span className="text-[10px] text-indigo-300/60 font-medium">보호 원금</span>
+                      <span className="text-[10px] text-slate-400 font-medium">보호 원금</span>
                     </div>
-                    <div className="text-sm font-semibold text-white leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <div className="text-sm font-bold text-white leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
                       {((account?.balance || 0) - (account?.totalInterest || 0)).toLocaleString()}
-                      <span className="text-[10px] text-indigo-200/60 ml-0.5 font-normal">원</span>
+                      <span className="text-[10px] text-slate-400 ml-0.5 font-normal">원</span>
                     </div>
                   </div>
 
-                  <div className="flex-1 bg-emerald-400/10 rounded-xl px-3 py-2 border border-emerald-400/20 backdrop-blur-sm">
+                  {/* 이자 (JB머니) */}
+                  <div className="flex-1 bg-gradient-to-br from-emerald-900/40 to-emerald-800/20 rounded-xl px-2.5 py-2 border border-emerald-500/30 backdrop-blur-sm hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300 animate-countUp" style={{ animationDelay: '0.1s' }}>
                     <div className="flex items-center gap-1.5 mb-1">
-                      <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></div>
-                      <span className="text-[10px] text-emerald-300/80 font-medium">JB 머니</span>
+                      <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                      <span className="text-[10px] text-emerald-300 font-medium">JB 머니</span>
                     </div>
-                    <div className="text-sm font-semibold text-emerald-300 leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <div className="text-sm font-bold text-emerald-400 leading-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>
                       +{(account?.totalInterest || 0).toLocaleString()}
-                      <span className="text-[10px] text-emerald-300/70 ml-0.5 font-normal">원</span>
+                      <span className="text-[10px] text-emerald-300 ml-0.5 font-normal">원</span>
                     </div>
                   </div>
-
-                  {account?.nextZone === "extreme" && account?.extremeTheme && (
-                    <div className="flex-1 bg-purple-400/10 rounded-xl px-3 py-2 border border-purple-400/20 backdrop-blur-sm">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
-                        <span className="text-[10px] text-purple-300/80 font-medium">선택 테마</span>
-                      </div>
-                      <div className="text-sm font-semibold text-white leading-tight truncate">
-                        {account.extremeTheme}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -346,13 +382,11 @@ export function MainApp() {
             )}
           </div>
 
-          {/* 달에서 태양으로의 전환 */}
-          <div className="h-px bg-gradient-to-r from-indigo-800 via-indigo-400/30 to-indigo-800" />
         </div>
 
-        {/* ✅ 2) 아래만 스크롤되는 영역 (스크롤 유지 + 스크롤바만 숨김 + 하단 여백 증가) */}
+        {/* ✅ 2) 아래만 스크롤되는 영역 - 은은한 반투명 배경 */}
         <div
-          className="flex-1 min-h-0 overflow-y-auto bs-scroll"
+          className="flex-1 min-h-0 overflow-y-auto bs-scroll bg-white/5 backdrop-blur-sm"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none", // Firefox 스크롤바 숨김
