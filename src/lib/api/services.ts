@@ -35,34 +35,39 @@ const mockAccount: Account = {
 export const authApi = {
   // 로그인
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    if (USE_MOCK) {
-      // Mock 응답
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return {
-        token: 'mock-token-12345',
-        user: { ...mockUser, email: data.email },
-      };
-    }
-    const response = await apiClient.post<LoginResponse>('/auth/login', data);
+    // if (USE_MOCK) {
+    //   // Mock 응답
+    //   await new Promise(resolve => setTimeout(resolve, 500));
+    //   return {
+    //     token: 'mock-token-12345',
+    //     user: { ...mockUser, email: data.email },
+    //   };
+    // }
+     let myBoxAccountNo = localStorage.getItem('access_token') ?? '1068014311315'
+    const response = await apiClient.get<LoginResponse>(`/user?myBoxAccountNo=${myBoxAccountNo}`);
+    
     return response.data;
   },
 
   // 로그아웃
   logout: async (): Promise<void> => {
-    if (USE_MOCK) {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      return;
-    }
+    // if (USE_MOCK) {
+    //   await new Promise(resolve => setTimeout(resolve, 200));
+    //   return;
+    // }
     await apiClient.post('/auth/logout');
   },
 
   // 현재 사용자 정보 조회
   getCurrentUser: async (): Promise<User> => {
-    if (USE_MOCK) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockUser;
-    }
-    const response = await apiClient.get<User>('/auth/me');
+    // if (USE_MOCK) {
+    //   await new Promise(resolve => setTimeout(resolve, 300));
+    //   return mockUser;
+    // }
+    let myBoxAccountNo = localStorage.getItem('access_token') ?? '1068014311315'
+    console.log("getCurrentUser : " + myBoxAccountNo)
+    const response = await apiClient.get<User>(`/user?myBoxAccountNo=${myBoxAccountNo}`);
+    console.log(response);
     return response.data;
   },
 };
@@ -71,11 +76,12 @@ export const authApi = {
 export const accountApi = {
   // 계좌 정보 조회
   getAccount: async (): Promise<Account> => {
-    if (USE_MOCK) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockAccount;
-    }
-    const response = await apiClient.get<Account>('/account');
+    // if (USE_MOCK) {
+    //   await new Promise(resolve => setTimeout(resolve, 300));
+    //   return mockAccount;
+    // }
+    let myBoxAccountNo = localStorage.getItem('access_token') ?? '1068014311315';
+    const response = await apiClient.get<Account>(`/user?myBoxAccountNo=${myBoxAccountNo}`);
     return response.data;
   },
 

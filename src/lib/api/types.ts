@@ -8,23 +8,26 @@ export interface User {
   regionName?: string; // 지역 이름 (예: "서울특별시 강남구")
   createdAt: string;
 }
-
-// 계좌 정보
-export interface Account {
-  accountId: string;
+type Zone = "NONE" | "INTEREST" | "INTEREST_WORK" | "POWER_WORK";
+export interface UserInMyBoxDto {
   accountNo: string; // 계좌번호 (123-456-789012 형식)
   balance: number; // JB 머니 잔액
-  investBalance: number; // 투자 중인 금액
-  todayInterest: number; // 오늘 발생한 이자
-  todayProfit: string; // 오늘 수익 (String, +8.50 형식)
-  totalInterest: number; // 누적 발생 이자
-  dailyReturnRate: number; // 일 단위 수익률
-  currentZone: 'interest' | 'extreme' | 'balance'; // 오늘 투자중인 존
-  nextZone: 'interest' | 'extreme' | 'balance'; // 내일 투자할 존
-  extremeTheme?: string; // 익스트림존 선택 테마
-  balanceRatio?: number; // 밸런스존 비율 (25, 50, 75)
-  currentBalanceRatio?: number; // 오늘의 파워워크존 비율
-  nextBalanceRatio?: number; // 내일의 파워워크존 비율
+  bankCode: String;
+  investBalance: number;
+  selectedRegionCode: string;
+  selectedRegionName: string;
+  todayInterestAmount: string;
+  todayPowerWorkType: string;
+  todayProfit: number;
+  todayZoneType: Zone;
+  tommorrowZoneType: Zone;
+  tomorrowPowerWorkType: string;
+}
+// 계좌 정보
+export interface Account {
+  name: String;
+  phone: String;
+  UserInMyBoxDto: UserInMyBoxDto;
 }
 
 // 투자 내역
@@ -52,8 +55,7 @@ export interface RegionalRanking {
 
 // 로그인 요청
 export interface LoginRequest {
-  email: string;
-  password: string;
+  myAccountNo: string;
 }
 
 // 로그인 응답
@@ -64,7 +66,7 @@ export interface LoginResponse {
 
 // 존 선택 요청
 export interface SelectZoneRequest {
-  zone: 'interest' | 'extreme' | 'balance';
+  zone:   "NONE" | "INTEREST" | "INTEREST_WORK" | "POWER_WORK";
   theme?: string; // 익스트림존일 경우 필수
   ratio?: number; // 밸런스존일 경우 필수 (25, 50, 75)
 }

@@ -7,8 +7,6 @@ import { ReportPage } from "./components/pages/ReportPage";
 import { LoginPage } from "./components/pages/LoginPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
-
 export default function App() {
   return (
     <HashRouter>

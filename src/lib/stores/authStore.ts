@@ -52,21 +52,22 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         
         // Mock 모드이거나 이메일/비밀번호가 비어있으면 자동 로그인
-        if (USE_MOCK || (!email && !password)) {
-          setTimeout(() => {
-            set({
-              user: mockUser,
-              token: 'mock-token-12345',
-              isAuthenticated: true,
-              isLoading: false,
-            });
-          }, 500); // 로그인 애니메이션을 위한 짧은 딜레이
-          return;
-        }
+        // if (USE_MOCK || (!email && !password)) {
+        //   setTimeout(() => {
+        //     set({
+        //       user: mockUser,
+        //       token: 'mock-token-12345',
+        //       isAuthenticated: true,
+        //       isLoading: false,
+        //     });
+        //   }, 500); // 로그인 애니메이션을 위한 짧은 딜레이
+        //   return;
+        // }
         
         try {
-          const response = await authApi.login({ email, password });
-          
+          // TODO: LDJ 이후 고치기
+          const response = await authApi.login({ myAccountNo: '1068014311315' });
+          console.log("LDJ :" + response);
           // 토큰 저장
           localStorage.setItem('auth_token', response.token);
           
@@ -100,21 +101,22 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             error: null,
           });
+          throw new Error("로그아웃 없다.");
         }
       },
 
       // 인증 확인 (앱 시작 시 또는 페이지 로드 시)
       checkAuth: async () => {
         // Mock 모드일 때는 자동으로 인증된 상태로 설정
-        if (USE_MOCK) {
-          set({
-            user: mockUser,
-            token: 'mock-token-12345',
-            isAuthenticated: true,
-            isLoading: false,
-          });
-          return;
-        }
+        // if (USE_MOCK) {
+        //   set({
+        //     user: mockUser,
+        //     token: 'mock-token-12345',
+        //     isAuthenticated: true,
+        //     isLoading: false,
+        //   });
+        //   return;
+        // }
 
         const token = localStorage.getItem('auth_token');
         
@@ -142,6 +144,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         }
+        console.log("왜안돼")
       },
 
       // 에러 클리어

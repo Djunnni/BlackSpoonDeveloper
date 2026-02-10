@@ -9,8 +9,8 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK_API !== 'false';
 
 // Mock 계좌 데이터
 const mockAccount: Account = {
-  accountId: '037-1068011596267',
-  accountNo: '106-801-159626',
+  accountId: '0371068011596267',
+  accountNo: '106801159626',
   balance: 80000000,
   investBalance: 6800000,
   todayInterest: 329,
@@ -45,13 +45,14 @@ export const useAccountStore = create<AccountState>((set) => ({
   // 계좌 정보 조회
   fetchAccount: async () => {
     // Mock 모드일 때는 이미 초기 데이터가 있으므로 빠르게 처리
-    if (USE_MOCK) {
-      set({ isLoading: true });
-      setTimeout(() => {
-        set({ account: mockAccount, isLoading: false });
-      }, 300);
-      return;
-    }
+    // if (USE_MOCK) {
+    //   set({ isLoading: true });
+    //   setTimeout(() => {
+    //     set({ account: mockAccount, isLoading: false });
+    //   }, 300);
+    //   return;
+    // }
+    console.log('fetch account')
 
     set({ isLoading: true, error: null });
     try {

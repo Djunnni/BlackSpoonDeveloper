@@ -12,19 +12,18 @@ import { DevToolsPanel } from "./DevToolsPanel";
 import { requestAccessToken } from "../../lib/utils/native-bridge";
 import { getUserInfo } from "../../lib/api/rest-api";
 
-type Zone = "interest" | "extreme" | "balance";
+type Zone = "INTEREST" | "INTEREST_WORK" | "POWER_WORK";
 
 export function MainApp() {
   const navigate = useNavigate();
-  const { user, fetchUserFromApi } = useAuthStore();
   const { account, fetchAccount, fetchAccountFromApi, selectZone, isLoading } =
     useAccountStore();
-
+  console.log(account)
   const [showTomorrowZoneSetup, setShowTomorrowZoneSetup] =
     useState(false);
   const [setupZoneType, setSetupZoneType] = useState<
-    "extreme" | "balance"
-  >("extreme");
+    "INTEREST_WORK" | "POWER_WORK"
+  >("INTEREST_WORK");
   const [showRegionAlert, setShowRegionAlert] = useState(false);
   const [showAllZones, setShowAllZones] = useState(false);
   
@@ -78,11 +77,11 @@ export function MainApp() {
       
       console.log('[MainApp] 🔧 USE_MOCK_API:', USE_MOCK_API);
       
-      if (USE_MOCK_API) {
-        // Mock 모드: 기존 방식 사용
-        console.log('[MainApp] Using MOCK API mode');
-        fetchAccount();
-      } else {
+      // if (USE_MOCK_API) {
+      //   // Mock 모드: 기존 방식 사용
+      //   console.log('[MainApp] Using MOCK API mode');
+      //   fetchAccount();
+      // } else {
         // 실제 API 모드: fetchUserFromApi/fetchAccountFromApi가 내부에서 accessToken 처리
         console.log('[MainApp] Using REAL API mode - will call HTTP endpoint');
         try {
@@ -91,7 +90,6 @@ export function MainApp() {
           // 사용자 정보와 계좌 정보를 동시에 가져오기
           // (각 store의 fetch 함수가 내부에서 getUserInfo() 호출 → accessToken 자동 요청)
           await Promise.all([
-            fetchUserFromApi(),
             fetchAccountFromApi(),
           ]);
           
@@ -101,15 +99,15 @@ export function MainApp() {
           // 에러 발생 시 Mock 데이터로 폴백
           fetchAccount();
         }
-      }
+      // }
     };
     
     loadInitialData();
-  }, [fetchAccount, fetchUserFromApi, fetchAccountFromApi]);
+  }, [fetchAccount, fetchAccountFromApi]);
 
   // ✅ 원래 지역 판단
   const realHasRegion = !!(
-    user?.regionCode && user.regionCode !== "000000"
+    account?.UserInMyBoxDto?.selectedRegionCode && account.UserInMyBoxDto?.selectedRegionCode !== "000000"
   );
 
   // ✅ 최종: 개발용 강제 활성화 or 임시 활성화가 켜져 있으면 true
@@ -117,12 +115,12 @@ export function MainApp() {
     realHasRegion || tempHasRegion || DEV_FORCE_ZONE_ENABLE;
 
   const handleTomorrowZoneClick = (zone: Zone) => {
-    if (zone === "interest") {
-      selectZone({ zone: "interest" });
+    if (zone === "INTEREST") {
+      selectZone({ zone: "INTEREST" });
       return;
     }
 
-    if (zone === "extreme" || zone === "balance") {
+    if (zone === "INTEREST_WORK" || zone === "POWER_WORK") {
       // ✅ 개발 중에는 무조건 열리게 (지역 체크/모달 차단 전부 무시)
       if (DEV_FORCE_ZONE_ENABLE) {
         setShowRegionAlert(false);
@@ -173,21 +171,20 @@ export function MainApp() {
       
       console.log('[MainApp] 🔧 Refresh - USE_MOCK_API:', USE_MOCK_API);
       
-      if (USE_MOCK_API) {
-        console.log('[MainApp] Using Mock API');
-        // Mock 모드
-        await fetchAccount();
-      } else {
+      // if (USE_MOCK_API) {
+      //   console.log('[MainApp] Using Mock API');
+      //   // Mock 모드
+      //   await fetchAccount();
+      // } else {
         console.log('[MainApp] Using Real API - calling HTTP endpoint...');
         
         // ✅ 실제 API 호출: authStore와 accountStore가 각각 getUserInfo() 호출
         await Promise.all([
-          fetchUserFromApi(),
           fetchAccountFromApi(),
         ]);
         
         console.log('[MainApp] ✅ Data updated in stores');
-      }
+  //    }
     } catch (error) {
       console.error('[MainApp] ❌ Failed to refresh data:', error);
       alert(`❌ API 호출 실패: ${error instanceof Error ? error.message : String(error)}`);
@@ -197,7 +194,7 @@ export function MainApp() {
       setIsRefreshing(false);
       setPullDistance(0);
     }
-  }, [isRefreshing, fetchAccount, fetchUserFromApi, fetchAccountFromApi]);
+  }, [isRefreshing, fetchAccount, fetchAccountFromApi]);
 
   // Pull-to-Refresh: 터치 이벤트 핸들러
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -338,9 +335,9 @@ export function MainApp() {
   }, [onNativeMessage]);
 
   const getZoneLabel = (zone?: Zone, isForTomorrow?: boolean) => {
-    if (zone === "interest") return "이자존";
-    if (zone === "extreme") return "이자워크존";
-    if (zone === "balance") {
+    if (zone === "INTEREST") return "이자존";
+    if (zone === "INTEREST_WORK") return "이자워크존";
+    if (zone === "POWER_WORK") {
       // 내일 투자 존인 경우 nextBalanceRatio 사용
       const ratio = isForTomorrow ? account?.nextBalanceRatio : account?.currentBalanceRatio;
       if (ratio) {
@@ -443,7 +440,7 @@ export function MainApp() {
                     <div>
                       <div className="text-base font-bold text-amber-400">JB 머니</div>
                       <div className="text-sm text-slate-300 font-bold mt-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {account?.accountNo || '106-801-159626'}
+                        { account?.UserInMyBoxDto?.accountNo }
                       </div>
                     </div>
                   </div>
@@ -454,22 +451,22 @@ export function MainApp() {
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/60 rounded-full border border-slate-700/50">
                       <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
                       <span className="text-[11px] text-slate-300 font-semibold">
-                        {user?.regionName || "전북 전주시 덕진구"}
+                        {account?.UserInMyBoxDto?.selectedRegionName || "전북 전주시 덕진구"}
                       </span>
                     </div>
                     
                     {/* 이자워크존 테마 */}
-                    {account?.currentZone === 'extreme' && account?.extremeTheme && (
+                    {account?.UserInMyBoxDto?.todayZoneType === 'INTEREST_WORK' && account?.UserInMyBoxDto && (
                       <div className="flex items-center gap-1.5 px-2.5 py-1 bg-orange-500/10 rounded-full border border-orange-500/20">
                         <div className="w-1 h-1 bg-orange-400 rounded-full"></div>
                         <span className="text-[10px] text-orange-400 font-medium">
-                          {account.extremeTheme}
+                          {/*account.extremeTheme*/ '테마'}
                         </span>
                       </div>
                     )}
                     
                     {/* 파워워크존 투자 스타일 & 테마 */}
-                    {account?.currentZone === 'balance' && (
+                    {account?.UserInMyBoxDto?.todayZoneType === 'POWER_WORK' && (
                       <>
                         {/* 투자 스타일 + 원금 비율 */}
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-500/10 rounded-full border border-purple-500/20">
@@ -482,7 +479,7 @@ export function MainApp() {
                           </span>
                         </div>
                         
-                        {/* 선택한 테마 */}
+                        {/* 선택한 테마
                         {account?.extremeTheme && (
                           <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-500/10 rounded-full border border-purple-500/20">
                             <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
@@ -490,7 +487,7 @@ export function MainApp() {
                               {account.extremeTheme}
                             </span>
                           </div>
-                        )}
+                        )} */}
                       </>
                     )}
                   </div>
@@ -504,18 +501,18 @@ export function MainApp() {
                       fontVariantNumeric: 'tabular-nums',
                       letterSpacing: '-0.02em'
                     }}>
-                      {((account?.balance || 0) + (account?.investBalance || 0)).toLocaleString()}
+                      {((account?.UserInMyBoxDto?.balance || 0) + (account?.UserInMyBoxDto?.investBalance || 0)).toLocaleString()}
                       <span className="text-base text-slate-400 ml-1.5 font-normal">원</span>
                     </h1>
                     
                     <span className="text-base font-bold text-emerald-400 shrink-0" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {account?.todayProfit || '+0.00'}%
+                      {account?.UserInMyBoxDto?.todayProfit || '+0.00'}%
                     </span>
                   </div>
                   
                   {/* 수익금 */}
                   <div className="text-base font-bold text-emerald-400" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    +{(account?.investBalance || 0).toLocaleString()}원
+                    +{(account?.UserInMyBoxDto?.investBalance || 0).toLocaleString()}원
                   </div>
                 </div>
 
@@ -524,22 +521,22 @@ export function MainApp() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <Shield className={`w-5 h-5 ${
-                        account?.currentZone === 'interest' ? 'text-blue-400' :
-                        account?.currentZone === 'extreme' ? 'text-orange-400' :
+                        account?.UserInMyBoxDto?.todayZoneType === 'INTEREST' ? 'text-blue-400' :
+                        account?.UserInMyBoxDto?.todayZoneType === 'INTEREST_WORK' ? 'text-orange-400' :
                         'text-purple-400'
                       }`} />
                       <div>
                         <div className={`text-base font-bold ${
-                          account?.currentZone === 'interest' ? 'text-blue-300' :
-                          account?.currentZone === 'extreme' ? 'text-orange-300' :
+                          account?.UserInMyBoxDto?.todayZoneType === 'INTEREST' || account?.UserInMyBoxDto?.todayZoneType === 'NONE' ? 'text-blue-300' :
+                          account?.UserInMyBoxDto?.todayZoneType === 'INTEREST_WORK' ? 'text-orange-300' :
                           'text-purple-300'
                         }`}>
-                          {account?.currentZone === 'interest' && '이자존'}
-                          {account?.currentZone === 'extreme' && '이자워크존'}
-                          {account?.currentZone === 'balance' && account?.currentBalanceRatio && `파워워크존 ${account.currentBalanceRatio}%`}
-                          {account?.currentZone === 'balance' && !account?.currentBalanceRatio && '파워워크존'}
+                          {account?.UserInMyBoxDto?.todayZoneType === 'INTEREST' || account?.UserInMyBoxDto?.todayZoneType === 'NONE' && '이자존'}
+                          {account?.UserInMyBoxDto?.todayZoneType === 'INTEREST_WORK' && '이자워크존'}
+                          {account?.UserInMyBoxDto?.todayZoneType === 'POWER_WORK' && account?.currentBalanceRatio && `파워워크존 ${account.currentBalanceRatio}%`}
+                          {account?.UserInMyBoxDto?.todayZoneType === 'POWER_WORK' && !account?.currentBalanceRatio && '파워워크존'}
                         </div>
-                        {(account?.currentZone === 'extreme' || account?.currentZone === 'balance') && account?.extremeTheme && (
+                        {(account?.UserInMyBoxDto?.todayZoneType=== 'INTEREST_WORK' || account?.UserInMyBoxDto?.todayZoneType === 'POWER_WORK') && account?.extremeTheme && (
                           <div className="text-xs text-slate-400 mt-0.5">{account.extremeTheme}</div>
                         )}
                       </div>
@@ -548,7 +545,7 @@ export function MainApp() {
                     <div className="text-right">
                       <div className="text-[11px] text-slate-400 mb-0.5 font-medium">원금</div>
                       <div className="text-sm font-bold text-slate-200" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {(account?.balance || 0).toLocaleString()}
+                        {(account?.UserInMyBoxDto?.balance || 0).toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -680,7 +677,7 @@ export function MainApp() {
                     {/* 항상 모든 존 표시 */}
                     <div className="space-y-3">
                       <TomorrowZoneSelector
-                        tomorrowZone={account?.nextZone || "interest"}
+                        tomorrowZone={account?.UserInMyBoxDto?.tommorrowZoneType || "INTEREST"}
                         onZoneClick={(zone) => {
                           handleTomorrowZoneClick(zone);
                         }}

@@ -2,7 +2,7 @@ import type { GetUserResponse, AccessTokenInfo } from './api-types';
 import { requestAccessToken, isNativeBridgeAvailable } from '../utils/native-bridge';
 
 // API 베이스 URL
-const API_BASE_URL = 'https://blackspoondev-sandbox.mxapps.io/rest/apiservice/v1';
+// const API_BASE_URL = 'https://blackspoondev-sandbox.mxapps.io/rest/apiservice/v1';
 
 // 개발 모드 플래그 (런타임에서 localStorage로 제어 가능)
 function isDevMode(): boolean {
@@ -84,11 +84,12 @@ export async function getUserInfo(): Promise<GetUserResponse> {
   let debugToken = localStorage.getItem('DEBUG_ACCESS_TOKEN');
   
   let accessToken: string;
-  
+
   if (debugToken) {
     console.log('🧪 [API] Using DEBUG_ACCESS_TOKEN from localStorage:', debugToken);
     accessToken = debugToken;
   } else {
+    console.log('aaa')
     // Native Bridge 사용 가능 여부 확인
     if (!isNativeBridgeAvailable()) {
       // Native Bridge가 없으면 자동으로 디버그 토큰 사용
@@ -115,7 +116,7 @@ export async function getUserInfo(): Promise<GetUserResponse> {
 
   try {
     // API 호출 - accessToken을 myBoxAccountNo로 사용
-    const url = `${API_BASE_URL}/user?myBoxAccountNo=${encodeURIComponent(accessToken)}`;
+    const url = `${''}/user?myBoxAccountNo=${encodeURIComponent(accessToken)}&a=a`;
     console.log('🌐 [API] 🚀 Calling HTTP GET:', url);
     console.log('📡 [API] Check Network tab in DevTools!');
     
