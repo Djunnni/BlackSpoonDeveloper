@@ -14,6 +14,13 @@ import { getUserInfo } from "../../lib/api/rest-api";
 
 type Zone = "INTEREST" | "INTEREST_WORK" | "POWER_WORK";
 
+const typeMap = {
+  SAFE: { label: "안정형", percent: 25 },
+  BALANCED: { label: "균형형", percent: 50 },
+  ATTACK: { label: "공격형", percent: 75 },
+};
+
+
 export function MainApp() {
   const navigate = useNavigate();
   const { account, fetchAccount, fetchAccountFromApi, selectZone, isLoading } =
@@ -451,7 +458,7 @@ export function MainApp() {
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/60 rounded-full border border-slate-700/50">
                       <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
                       <span className="text-[11px] text-slate-300 font-semibold">
-                        {account?.UserInMyBoxDto?.selectedRegionName || "전북 전주시 덕진구"}
+                        {account?.UserInMyBoxDto?.selectedRegionName || "지역 선택"}
                       </span>
                     </div>
                     
@@ -472,10 +479,11 @@ export function MainApp() {
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-500/10 rounded-full border border-purple-500/20">
                           <div className="w-1 h-1 bg-purple-400 rounded-full"></div>
                           <span className="text-[10px] text-purple-400 font-medium">
-                            {account?.currentBalanceRatio === 25 && '안정형'}
-                            {account?.currentBalanceRatio === 50 && '균형형'}
-                            {account?.currentBalanceRatio === 75 && '공격형'}
-                            {account?.currentBalanceRatio && ` · 원금 ${account.currentBalanceRatio}%`}
+                            {account?.UserInMyBoxDto?.todayPowerWorkType === "SAFE" && '안정형'}
+                            {account?.UserInMyBoxDto?.todayPowerWorkType === "BALANCED" && '균형형'}
+                            {account?.UserInMyBoxDto?.todayPowerWorkType === "ATTACK" && '공격형'}
+                            {account?.UserInMyBoxDto?.todayPowerWorkType !== "NONE" && account?.UserInMyBoxDto?.todayPowerWorkType !== "INTEREST" && ` · 원금 
+                              ${typeMap[account?.UserInMyBoxDto?.todayPowerWorkType]?.percent}%`}
                           </span>
                         </div>
                         
